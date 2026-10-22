@@ -124,6 +124,7 @@ input:focus{border-color:var(--p2)}
 .managing .tools{display:none}
 .name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#b9a9c1;margin:0 2px 8px}
 .acts .b-red{background:#ffe6ec;color:#e0405a}
+#bar2 button[onclick="restoreAllCardSizes()"]{border-color:var(--line);background:color-mix(in srgb,var(--p2) 10%,var(--surface));color:var(--ink)}
 .acts .b-gray{background:#f4eef8}
 .thumb{background:#fdf4f9;box-shadow:inset 0 0 0 1px #fbe3ef}
 .file{padding:9px}
@@ -214,7 +215,7 @@ input:focus{border-color:var(--p2)}
 body.dragging{-webkit-user-select:none;user-select:none}
 /* 缩略图左侧为排序轨道预留独立空间，避免遮挡图片 */
 .thumb{padding-left:16px;box-sizing:border-box}
-.pop{max-height:calc(100vh - 24px);overflow-y:auto}
+.pop{width:min(196px,calc(100vw - 24px));max-height:min(38vh,270px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;padding:5px}.pop button{white-space:normal;line-height:1.3;padding:9px 10px;font-size:13px;border-radius:9px}.pop button+button{border-top:1px solid var(--line)}
 
 /* ===== 进阶功能：侧栏、搜索、卡片尺寸、相似检测、暗色主题 ===== */
 :root{--bg:#fff6fb;--surface:#fff;--ink:#5b4a63;--line:#f3dcea}
@@ -416,13 +417,14 @@ body.dark .head-menu{background:#ffffff20;border-color:#ffffff48}
     <span>
       <button class="b-gray b-mini" onclick="startSearchMode()">搜索图片</button>
       <button class="b-gray b-mini" onclick="reloadAll()">重新加载</button>
+      <button class="b-gray b-mini" onclick="restoreAllCardSizes()">恢复所有图片原始大小</button>
       <button class="b-gray b-mini" onclick="checkAll()">检查文件</button>
       <button class="b-gray b-mini" id="hlBtn" onclick="toggleHl()">标出未命名</button>
       <button class="b-gray b-mini" id="manageBtn" onclick="toggleManage()">批量管理</button>
       <button class="b-red b-mini" id="delCatBtn" onclick="delCat()" style="display:none">删除分类</button>
     </span>
   </div>
-  <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">⏭ 下一张未命名</button></div>
+  <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">下一张未命名</button></div>
   <div id="grid"></div>
   </div>
 </main>
@@ -480,7 +482,7 @@ function getToken(){return lsGet("gh_token")||"";}
 function saveToken(){
   const v=$("token").value.trim();
   if(!v){toast("请先粘贴 Token");return;}
-  lsSet("gh_token",v);toast("Token 已保存 ✅");loadAll();
+  lsSet("gh_token",v);toast("Token 已保存");loadAll();
 }
 function headers(){return {"Authorization":"token "+getToken(),"Accept":"application/vnd.github+json","Content-Type":"application/json"};}
 async function gh(method,url,body){
@@ -523,7 +525,7 @@ function makeTaskEl(t){
 function setTask(t,s,err){
   t.status=s;t.err=err||"";
   const st=t.el.querySelector(".qst"),rb=t.el.querySelector(".qretry");
-  st.textContent={wait:"⏳ 排队中",up:"⬆️ 上传中",ok:"✅ 成功",fail:"❌ "+t.err}[s];
+  st.textContent={wait:"排队中",up:"上传中",ok:"成功",fail:"失败："+t.err}[s];
   st.className="qst "+s;
   rb.style.display=s==="fail"?"inline-block":"none";
   t.el.classList.toggle("hide",filterFail&&s!=="fail");
@@ -532,7 +534,7 @@ function setTask(t,s,err){
 function updateQ(){
   const c={wait:0,up:0,ok:0,fail:0};tasks.forEach(t=>c[t.status]++);
   const total=tasks.length;
-  $("qsum").textContent=`共 ${total} 张　✅ ${c.ok}　❌ ${c.fail}　⏳ ${c.wait+c.up}`;
+  $("qsum").textContent=`共 ${total} 张　成功 ${c.ok}　失败 ${c.fail}　等待 ${c.wait+c.up}`;
   $("qall").firstElementChild.style.width=(total?(c.ok+c.fail)/total*100:0)+"%";
   $("qarrow").textContent=$("qbox").classList.contains("open")?"▲ 收起":"▼ 展开";
   if(!total)$("qbox").style.display="none";
@@ -546,7 +548,7 @@ function toggleFilter(){
 }
 function retryAll(){
   const f=tasks.filter(t=>t.status==="fail");
-  if(!f.length){toast("没有失败的 🎉");return;}
+  if(!f.length){toast("没有失败的");return;}
   f.forEach(t=>setTask(t,"wait"));pump();
 }
 function clearOk(){
@@ -563,7 +565,7 @@ async function pump(){
   running=false;
   if(did){
     const f=tasks.filter(t=>t.status==="fail").length;
-    toast(f?`上传完成，有 ${f} 张失败，可点重新上传`:"全部上传成功 🎉");
+    toast(f?`上传完成，有 ${f} 张失败，可点重新上传`:"全部上传成功");
     loadAll();
   }
 }
@@ -598,7 +600,7 @@ async function doUpload(t){
     let src=t.file;
     const head=new Uint8Array(await src.slice(0,16).arrayBuffer());
     if(sniff(head)==="HEIC"){
-      t.el.querySelector(".qst").textContent="🔄 转换 HEIC…";
+      t.el.querySelector(".qst").textContent="转换 HEIC…";
       src=await heicToPng(src);
       t.name=t.name.replace(/\.[^.]+$/,"")+".png";
     }
@@ -632,7 +634,7 @@ async function loadAll(){
   if(!getToken()){grid.innerHTML='<div class="empty">先在上面保存 Token，图库才会显示～</div>';$("tabs").innerHTML="";$("count").textContent="";return;}
   const silent=(renderedDir===curDir&&!!grid.querySelector(".file"));
   const keepY=window.scrollY;
-  if(silent)showBusy("刷新中…");else grid.innerHTML='<div class="empty">加载中…🌸</div>';
+  if(silent)showBusy("刷新中…");else grid.innerHTML='<div class="empty">正在加载…</div>';
   try{
     const root=await ghList("");
     const base=await ghList(BASE);
@@ -640,10 +642,10 @@ async function loadAll(){
     const cats=[...new Set([...baseDirs,...localCats()])];
     const legacyFiles=root.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)));
     const legacyDirs=root.filter(f=>f.type==="dir"&&!f.name.startsWith(".")&&f.name!==BASE).map(f=>f.name);
-    tabs=[{label:"🌷 未分类",dir:BASE}];
-    cats.forEach(c=>tabs.push({label:"📁 "+c,dir:BASE+"/"+c}));
-    if(legacyFiles.length)tabs.push({label:"📦 旧文件（仓库根目录）",dir:""});
-    legacyDirs.forEach(d=>tabs.push({label:"📦 旧："+d,dir:d}));
+    tabs=[{label:"未分类",dir:BASE}];
+    cats.forEach(c=>tabs.push({label:c,dir:BASE+"/"+c}));
+    if(legacyFiles.length)tabs.push({label:"旧文件（仓库根目录）",dir:""});
+    legacyDirs.forEach(d=>tabs.push({label:"旧："+d,dir:d}));
     if(!tabs.some(t=>t.dir===curDir))curDir=BASE;
     const list=curDir===""?root:curDir===BASE?base:await ghList(curDir);
     items=list.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)))
@@ -689,7 +691,7 @@ async function addCat(){
 function renderGrid(){
   const grid=$("grid");grid.innerHTML="";thumbs=[];arrows=[];
   $("count").textContent=`共 ${items.length} 个文件 · ${fmtSize(items.reduce((a,f)=>a+f.size,0))}`;
-  if(!items.length){grid.innerHTML='<div class="empty">这里还是空的，上传点东西吧～🍃</div>';applyManage();return;}
+  if(!items.length){grid.innerHTML='<div class="empty">这里还是空的，上传点东西吧～</div>';applyManage();return;}
   items.forEach(f=>{
     const url=siteUrl(f.path);
     const card=document.createElement("div");card.className="file"+(selected.has(f.path)?" sel":"")+(hlUnnamed&&!names[f.path]?" unnamed":"");
@@ -700,24 +702,24 @@ function renderGrid(){
     if(AUD.includes(ext(f.name))){const a=document.createElement("audio");a.controls=true;a.src=url;a.preload="none";th.appendChild(a);entry.el=a;entry.audio=true;}
     else{
       const im=document.createElement("img");im.loading="lazy";th.appendChild(im);
-      const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="😢 加载失败<br>点这里重试";
+      const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="加载失败<br>点这里重试";
       fb.onclick=e=>{e.stopPropagation();loadImg(f,im,true,true);};th.appendChild(fb);
       entry.el=im;loadImg(f,im,false);
     }
     thumbs.push(entry);
     const grip=document.createElement("div");grip.className="grip";grip.title="长按拖动排序";grip.innerHTML="<i></i><i></i><i></i>";
     gripAttach(grip,card,f);th.appendChild(grip);
-    const rl=document.createElement("button");rl.className="rl";rl.textContent="🔄";rl.title="重新加载";
+    const rl=document.createElement("button");rl.className="rl";rl.textContent="↻";rl.title="重新加载";
     rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
     const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制 ✅");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制 ✅"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
     const acts=document.createElement("div");acts.className="acts";
-    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制 ✅（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
+    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
     const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>openImg(f,url);
     const b3=document.createElement("button");b3.className="b-red";b3.textContent="删除";b3.onclick=()=>delOne(f);
     acts.append(b1,b2,b3);
     const al=document.createElement("div");
     al.className="alias"+(names[f.path]?"":" none");
-    al.textContent=names[f.path]?"🏷️ "+names[f.path]:"🏷️ 点我命名";
+    al.textContent=names[f.path]?names[f.path]:"点我命名";
     al.onclick=()=>{if(managing)return;renameImg(f,al);};
     const head=document.createElement("div");head.className="head";
     const tools=document.createElement("div");tools.className="tools";
@@ -727,7 +729,7 @@ function renderGrid(){
     card.append(chk,th,head,nm);
     ["nw","ne","sw","se"].forEach(pos=>{const h=document.createElement("div");h.className="resize-handle "+pos;h.title="拖动调整卡片大小（最多两格）";h.addEventListener("pointerdown",e=>beginResize(e,card,f,pos));th.appendChild(h);});
     const pr=probeRes[f.path];
-    if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent="⚠️ "+pr.msg;card.append(w);}
+    if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent=pr.msg;card.append(w);}
     const more=document.createElement("button");more.className="b-gray more";more.textContent="⋯";more.title="更多";
     more.onclick=e=>{e.stopPropagation();openMore(f,entry,al,more);};
     card.append(acts);
@@ -744,7 +746,7 @@ function renderGrid(){
   updateHlBtn();
 }
 async function copy(text,msg){
-  msg=msg||"链接已复制 ✅";
+  msg=msg||"链接已复制";
   try{await navigator.clipboard.writeText(text);toast(msg);}
   catch(e){
     const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
@@ -855,7 +857,7 @@ function finishDrag(){
   const byPath=new Map(items.map(f=>[f.path,f]));
   items=order.map(p=>byPath.get(p)).filter(Boolean);
   saveOrder(curDir,order);
-  toast("顺序已保存 ✅");
+  toast("顺序已保存");
 }
 
 /* ================= 图片名字 ================= */
@@ -887,7 +889,7 @@ async function renameImg(f,el){
   if(n)names[f.path]=n;else delete names[f.path];
   saveNamesLocal();
   el.className="alias"+(n?"":" none");
-  el.textContent=n?"🏷️ "+n:"🏷️ 点我命名";refreshArrow(el);
+  el.textContent=n?n:"点我命名";refreshArrow(el);
   const cardEl=el.closest(".file");if(cardEl)cardEl.classList.toggle("unnamed",hlUnnamed&&!n);
   updateHlBtn();
 }
@@ -904,7 +906,7 @@ async function backupNames(){
     const r=await fetch(API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:headers(),cache:"no-store"});
     if(r.ok)sha=(await r.json()).sha;
     await gh("PUT",API+encPath(NAMES_PATH),{message:"backup names",content:b64enc(JSON.stringify({v:2,names,order:orderMap()},null,1)),branch:GH_BRANCH,sha});
-    toast("名字和排序已备份到仓库 ☁️");
+    toast("名字和排序已备份到仓库");
   }catch(e){toast("备份失败："+e.message);}
 }
 async function restoreNames(){
@@ -912,7 +914,7 @@ async function restoreNames(){
   try{
     const j=await gh("GET",API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now());
     applyBackup(JSON.parse(b64dec(j.content)));
-    toast("已恢复图片名字和排序 ✅");loadAll();
+    toast("已恢复图片名字和排序");loadAll();
   }catch(e){toast("恢复失败："+(e.message==="Not Found"?"仓库里还没有备份":e.message));}
 }
 async function autoRestoreNames(){
@@ -925,7 +927,7 @@ async function autoRestoreNames(){
 
 /* ================= 导出 ================= */
 const EXP_SYMS=[["","不加符号"],["：","中文冒号 ："],[":","英文冒号 :"],["，","中文逗号 ，"],[",","英文逗号 ,"]];
-const EXP_FMTS=[["box","📋 文字框"],["txt","📄 TXT"],["json","🧾 JSON"],["csv","📊 CSV"],["docx","📝 DOCX"]];
+const EXP_FMTS=[["box","文字框"],["txt","TXT"],["json","JSON"],["csv","CSV"],["docx","DOCX"]];
 let exp={fmt:lsGet("gh_exp_fmt")||"box",sym:lsGet("gh_exp_sym")===null?"：":lsGet("gh_exp_sym"),list:[]};
 
 function openExport(){
@@ -956,7 +958,7 @@ function renderExport(){
   <div class="actrow"><button class="b-main" onclick="expCopy()">一键复制</button>${exp.fmt!=="box"?'<button class="b-main" onclick="expDownload()">下载文件</button>':""}<button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("expText").value=genExport();
 }
-function expCopy(){copy($("expText").value,"已复制 ✅");}
+function expCopy(){copy($("expText").value,"已复制");}
 function saveBlob(blob,filename){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;
   document.body.appendChild(a);a.click();a.remove();
@@ -970,7 +972,7 @@ function expDownload(){
   else if(exp.fmt==="json")saveBlob(new Blob([text],{type:"application/json;charset=utf-8"}),base+".json");
   else if(exp.fmt==="csv")saveBlob(new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"}),base+".csv");
   else if(exp.fmt==="docx")saveBlob(makeDocx(text.split(/\r?\n/)),base+".docx");
-  toast("已生成文件，请看浏览器的下载提示 💾");
+  toast("已生成文件，请看浏览器的下载提示");
 }
 
 /* 手写一个最简单的 docx（不依赖任何外部库） */
@@ -1044,7 +1046,7 @@ function renderStat(){
 /* ================= 清理历史 ================= */
 async function cleanHistory(){
   if(running){toast("还在上传中，等传完再清理");return;}
-  if(!confirm("清理历史记录会把仓库的所有历史压成一条。\n\n✅ 现在的图片、分类、链接都不会变\n⚠️ 之前删除的图片会彻底回收，再也找不回来\n⚠️ 这个操作不能撤销\n\n确定继续吗？"))return;
+  if(!confirm("清理历史记录会把仓库的所有历史压成一条。\n\n现在的图片、分类、链接都不会变\n之前删除的图片会彻底回收，再也找不回来\n这个操作不能撤销\n\n确定继续吗？"))return;
   if(!confirm("再确认一次：真的要清理历史记录吗？"))return;
   try{
     toast("清理中…请稍等");
@@ -1053,7 +1055,7 @@ async function cleanHistory(){
     const commit=await gh("GET",GIT+"commits/"+head);
     const nc=await gh("POST",GIT+"commits",{message:"clean history",tree:commit.tree.sha,parents:[]});
     await gh("PATCH",GIT+"refs/heads/"+GH_BRANCH,{sha:nc.sha,force:true});
-    toast("历史记录已清理 ✅ GitHub 回收空间需要一点时间");
+    toast("历史记录已清理。GitHub 回收空间需要一点时间");
   }catch(e){toast("清理失败："+e.message);}
 }
 
@@ -1063,15 +1065,15 @@ async function loadPagesStatus(){
   const el=$("pstat");if(!el)return;
   try{
     const j=await gh("GET",REPO_API+"pages/builds/latest");
-    const map={built:"✅ 已发布",building:"⏳ 发布中",queued:"⏳ 排队中",errored:"❌ 出错"};
+    const map={built:"已发布",building:"发布中",queued:"排队中",errored:"出错"};
     const t=new Date(j.updated_at||j.created_at).toLocaleString();
     el.textContent="网站发布状态："+(map[j.status]||j.status)+(j.error&&j.error.message?"："+j.error.message:"")+"（"+t+"）";
-  }catch(e){el.textContent="🌐 网站发布状态：查不到（"+e.message+"）";}
+  }catch(e){el.textContent="网站发布状态：查不到（"+e.message+"）";}
 }
 async function rebuildPages(){
   try{
     await gh("POST",REPO_API+"pages/builds");
-    toast("已通知 GitHub 重新发布网站，约 1～5 分钟 🔁");
+    toast("已通知 GitHub 重新发布网站，约 1～5 分钟");
     setTimeout(loadPagesStatus,4000);
   }catch(e){toast("重新发布失败："+e.message);}
 }
@@ -1175,10 +1177,10 @@ function openReport(){
   const cnt=c=>bad.filter(r=>r.code===c).length;
   const unpub=cnt("unpub"),broken=cnt("empty")+cnt("bad"),net=cnt("net");
   let h=`<h3>检查结果</h3><div class="tip" style="font-size:13px">共检查 ${vals.length} 张，正常 ${vals.length-bad.length} 张，有问题 ${bad.length} 张。有问题的图片下面已经标出原因。</div>`;
-  if(unpub)h+=`<div class="lab">🌐 网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">重新发布网站</button></div>`;
-  if(broken)h+=`<div class="lab">💔 文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">尝试修复</button><button class="b-red" onclick="cleanBad()">清理</button></div>`;
-  if(net)h+=`<div class="lab">📶 网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
-  if(!bad.length)h+=`<div class="lab">🎉 全部正常</div>`;
+  if(unpub)h+=`<div class="lab">网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">重新发布网站</button></div>`;
+  if(broken)h+=`<div class="lab">文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">尝试修复</button><button class="b-red" onclick="cleanBad()">清理</button></div>`;
+  if(net)h+=`<div class="lab">网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
+  if(!bad.length)h+=`<div class="lab">全部正常</div>`;
   h+=`<div class="actrow"><button class="b-gray" onclick="closeSheet();checkList(reportList)">重新检查</button><button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("sheet").innerHTML=h;$("sheetMask").classList.add("show");
 }
@@ -1214,7 +1216,7 @@ async function repairOne(f){
 async function repairBad(){
   const list=badItems(["empty","bad"]);
   if(!list.length)return;
-  if(!confirm(`尝试修复 ${list.length} 张？\n会转成 PNG 重新上传，旧文件删除。\n⚠️ 链接会变（新文件名）。修不好的保持原样。`))return;
+  if(!confirm(`尝试修复 ${list.length} 张？\n会转成 PNG 重新上传，旧文件删除。\n链接会变（新文件名）。修不好的保持原样。`))return;
   closeSheet();let ok=0,bad=0;
   for(let i=0;i<list.length;i++){
     toast(`修复中 ${i+1}/${list.length}…`);
@@ -1308,11 +1310,11 @@ function jumpNextFrom(path){
     const j=(idx+k)%n;
     if(!names[items[j].path]){scrollToCard(cards[j]);return;}
   }
-  toast(names[path]?"没有未命名的了 🎉":"只剩这张没命名了");
+  toast(names[path]?"没有未命名的了":"只剩这张没命名了");
 }
 function jumpUnnamed(){
   const cards=[...document.querySelectorAll("#grid .file.unnamed")];
-  if(!cards.length){toast("没有未命名的了 🎉");return;}
+  if(!cards.length){toast("没有未命名的了");return;}
   const line=120;
   const next=cards.find(c=>c.getBoundingClientRect().top>line+8)||cards[0];
   scrollToCard(next);
@@ -1329,7 +1331,7 @@ function toggleHl(){
     c.classList.toggle("unnamed",hlUnnamed&&!!items[i]&&!names[items[i].path]);
   });
   updateHlBtn();
-  if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦 🎉");}
+  if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦");}
 }
 let popScroll=null;
 async function duplicateFile(f,where){
@@ -1360,7 +1362,7 @@ async function duplicateFile(f,where){
     const cur=items.map(x=>x.path);
     if(where==="side"){cur.splice(cur.indexOf(f.path)+1,0,np);}else cur.unshift(np);
     saveOrder(dir,cur);
-    toast(where==="side"?"已复制一份，就在原图旁边 ✅":"已复制一份，放在最前面 ✅（新链接约 1～2 分钟后生效）");
+    toast(where==="side"?"已复制一份，就在原图旁边":"已复制一份，放在最前面（新链接约 1～2 分钟后生效）");
     loadAll();
   }catch(e){toast("复制失败："+e.message);}
 }
@@ -1379,7 +1381,7 @@ async function copyImageFile(f){
   try{
     const pngP=(async()=>{const b=await fetchBlob(f);return b.type==="image/png"?b:await toPngBlob(b);})();
     await navigator.clipboard.write([new ClipboardItem({"image/png":pngP})]);
-    toast(ext(f.name)==="gif"?"已复制图片 ✅（动图复制后是静态图，想保留动画请用「分享原图文件」）":"已复制图片 ✅");
+    toast(ext(f.name)==="gif"?"已复制图片（动图复制后是静态图，想保留动画请用「分享原图文件」）":"已复制图片");
   }catch(e){toast("复制失败："+(e.message||"浏览器不允许")+"。可以试试「打开」后长按图片保存");}
 }
 function canShareFile(){
@@ -1400,17 +1402,17 @@ function openMore(f,entry,al,btn){
     const b=document.createElement("button");b.textContent=label;
     b.onclick=e=>{e.stopPropagation();closePop();fn();};pop.appendChild(b);
   };
-  add("☑️ 批量选择",()=>{if(!managing){managing=true;applyManage();}selected.add(f.path);const c=document.querySelector(`.file[data-path="${CSS.escape(f.path)}"]`);if(c)c.classList.add("sel");updateM();toast("已加入批量选择");});
-  add("↔️ 调整卡片大小 / 完成",()=>{const on=[...document.querySelectorAll(".file")].some(c=>c.classList.contains("resize-enabled"));document.querySelectorAll(".file").forEach(c=>c.classList.toggle("resize-enabled",!on));toast(on?"已结束尺寸调整":"拖动卡片四角调整，最多两格；再点⋯可结束调整");});
-  add("✏️ 改名字",()=>renameImg(f,al));
-  add("⏭ 下一张未命名",()=>jumpNextFrom(f.path));
-  if(!entry.audio)add("✂️ 裁剪",()=>openCrop(f));
-  add("🔄 重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
-  if(!entry.audio)add("📋 复制图片",()=>copyImageFile(f));
-  if(!entry.audio&&canShareFile())add("📤 分享原图文件",()=>shareImageFile(f));
-  add("➕ 复制一份到旁边",()=>duplicateFile(f,"side"));
-  add("⬆️ 复制一份到最前面",()=>duplicateFile(f,"top"));
-  if(!entry.audio)add("🩺 检查",()=>checkList([f]));
+  add("批量选择",()=>{if(!managing){managing=true;applyManage();}selected.add(f.path);const c=document.querySelector(`.file[data-path="${CSS.escape(f.path)}"]`);if(c)c.classList.add("sel");updateM();toast("已加入批量选择");});
+  add("恢复这张图片的原始大小",()=>restoreOneCardSize(f.path));
+  add("改名字",()=>renameImg(f,al));
+  add("下一张未命名",()=>jumpNextFrom(f.path));
+  if(!entry.audio)add("裁剪",()=>openCrop(f));
+  add("重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
+  if(!entry.audio)add("复制图片",()=>copyImageFile(f));
+  if(!entry.audio&&canShareFile())add("分享原图文件",()=>shareImageFile(f));
+  add("复制一份到旁边",()=>duplicateFile(f,"side"));
+  add("复制一份到最前面",()=>duplicateFile(f,"top"));
+  if(!entry.audio)add("检查",()=>checkList([f]));
   mask.onclick=closePop;
   mask.appendChild(pop);document.body.appendChild(mask);
   // 右边对齐 ⋯ 按钮、向左展开；靠近屏幕底部时改成向上展开
@@ -1446,7 +1448,7 @@ function buildCropUI(f,im,url){
   const handles=["nw","n","ne","e","se","s","sw","w"].map(t=>`<div class="ch ${t}" data-t="${t}"></div>`).join("");
   const m=document.createElement("div");m.id="cropMask";
   m.innerHTML=`<h3>裁剪这张图（${natW}×${natH}）</h3>
-  ${ext(f.name)==="gif"?'<div class="cnote">⚠️ 这是 gif，裁剪后会变成静态图</div>':""}
+  ${ext(f.name)==="gif"?'<div class="cnote">这是 gif，裁剪后会变成静态图</div>':""}
   <div id="cropStage"><div id="cropWrap" style="width:${W}px;height:${H}px">
     <div class="dim" id="dT"></div><div class="dim" id="dB"></div><div class="dim" id="dL"></div><div class="dim" id="dR"></div>
     <div id="cropBox">${handles}</div></div></div>
@@ -1539,10 +1541,10 @@ function buildCropUI(f,im,url){
       if(!replace)orderInsertAfter(dir,f.path,np);else if(np!==f.path)orderReplace(dir,f.path,np);
       if(np!==f.path&&names[f.path]){names[np]=names[f.path];saveNamesLocal();}
       let msg;
-      if(!replace)msg="已另存为新图，就在原图旁边 ✅";
-      else if(overwrite)msg="裁剪完成 ✅ 位置和链接都没变（网站缓存可能要几分钟才显示新图）";
+      if(!replace)msg="已另存为新图，就在原图旁边";
+      else if(overwrite)msg="裁剪完成 位置和链接都没变（网站缓存可能要几分钟才显示新图）";
       else{
-        msg="裁剪完成 ✅ 位置不变，但后缀变了，链接会变";
+        msg="裁剪完成 位置不变，但后缀变了，链接会变";
         try{await delFile(f.path,f.sha);dropNames([f.path]);}
         catch(e){msg="新图已上传，但原图没删掉，可以手动删除";}
       }
@@ -1591,7 +1593,7 @@ async function delMany(list,label){
     toast(`${label} ${i+1}/${list.length}…`);
     try{await delFile(list[i].path,list[i].sha);dropNames([list[i].path]);ok++;}catch(e){bad++;}
   }
-  toast(bad?`删除完成：成功 ${ok}，失败 ${bad}`:`已删除 ${ok} 个 ✅`);
+  toast(bad?`删除完成：成功 ${ok}，失败 ${bad}`:`已删除 ${ok} 个`);
 }
 async function delSelected(){
   const list=items.filter(f=>selected.has(f.path));
@@ -1635,7 +1637,7 @@ function openMove(){
   if(!items.some(f=>selected.has(f.path))){toast("先点选要移动的图片");return;}
   if(running){toast("还在上传中，等传完再移动");return;}
   const sh=$("sheet");sh.innerHTML="";
-  const h=document.createElement("h3");h.textContent=`📦 把选中的 ${selected.size} 张移动到…`;sh.appendChild(h);
+  const h=document.createElement("h3");h.textContent=`把选中的 ${selected.size} 张移动到…`;sh.appendChild(h);
   tabs.filter(t=>inBase(t.dir)&&t.dir!==curDir).forEach(t=>{
     const b=document.createElement("button");b.className="b-gray";b.textContent=t.label;
     b.onclick=()=>doMove(t.dir);sh.appendChild(b);
@@ -1657,7 +1659,7 @@ async function doMove(destDir){
   closeSheet();
   try{
     const n=await moveFiles(list,destDir);
-    toast(`已移动 ${n} 张 ✅ 新链接约 1～2 分钟后生效`);
+    toast(`已移动 ${n} 张 新链接约 1～2 分钟后生效`);
     curDir=destDir;managing=false;loadAll();
   }catch(e){toast("移动失败："+e.message);}
 }
@@ -1828,8 +1830,20 @@ function beginResize(e,card,f,pos){
   };
   document.addEventListener('pointermove',move,{passive:false});document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
 }
+function restoreOneCardSize(path){
+  let sizes={};try{sizes=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(_){sizes={}}
+  delete sizes[path];lsSet('gh_card_sizes',JSON.stringify(sizes));
+  const c=[...document.querySelectorAll('.file')].find(x=>x.dataset.path===path);
+  if(c){const th=c.querySelector('.thumb');c.style.removeProperty('--card-width');c.style.flex='';c.style.maxWidth='';c.style.marginLeft='';c.style.order='';delete c.dataset.customWidth;delete c.dataset.customHeight;if(th)th.style.height='120px';}
+  applyResizeFlowOrders();toast('已恢复这张图片的原始大小');
+}
+function restoreAllCardSizes(){
+  lsSet('gh_card_sizes','{}');
+  document.querySelectorAll('.file').forEach(c=>{const th=c.querySelector('.thumb');c.style.removeProperty('--card-width');c.style.flex='';c.style.maxWidth='';c.style.marginLeft='';c.style.order='';delete c.dataset.customWidth;delete c.dataset.customHeight;if(th)th.style.height='120px';});
+  applyResizeFlowOrders();toast('所有图片已恢复原始大小');
+}
 function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{const v=m[c.dataset.path];if(v){const th=c.querySelector('.thumb');if(v.width){let w=String(v.width);if(w.endsWith('%')){const pct=Math.max(25,Math.min(100,parseFloat(w)||50));const px=Math.max(92,Math.min($('grid').clientWidth-12,$('grid').clientWidth*pct/100));c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';c.dataset.customWidth=w;}}else if(v.span===2){const px=$('grid').clientWidth;c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';}if(th)th.style.height=v.height||'120px';}});applyResizeFlowOrders()}
-async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','🔴 大小一样'],['alias','🟢 命名一样'],['filename','🔵 文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
+async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','大小一样'],['alias','命名一样'],['filename','文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 async function dupeRename(path){const f={path,name:path.split('/').pop()};const v=await askText('修改图片命名（留空清除）',names[path]||'','输入新的命名');if(v===null)return;if(v.trim())names[path]=v.trim();else delete names[path];saveNamesLocal();toast('命名已更新');scanDuplicates('all');}
 function ignoreDupe(path){dupeIgnored.add(path);lsSet('gh_dupe_ignored',JSON.stringify([...dupeIgnored]));toast('已移出相似检测列表');scanDuplicates('all');}
