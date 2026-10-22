@@ -235,17 +235,89 @@ body.dark{--bg:#211d29;--surface:#2c2635;--ink:#f3e9f7;--line:#514258;--soft:#38
 #dupeView{display:none}#dupeView.show{display:block}#galleryView.hide{display:none}#dupeView .dupe-section{background:var(--surface);border-radius:18px;margin:12px 0;box-shadow:0 4px 14px #8e6b991a;overflow:hidden}#dupeView .dupe-head{width:100%;text-align:left;border-radius:0;background:#f9edf7;color:var(--ink);padding:14px;font-weight:700}#dupeView .dupe-body{display:none;padding:10px;max-height:55vh;overflow:auto}#dupeView .dupe-section.open .dupe-body{display:block}.dupe-group{border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}.dupe-group h4{font-size:13px;margin-bottom:8px}.dupe-files{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dupe-item{min-width:0;border:1px solid var(--line);border-radius:12px;padding:7px}.dupe-item img{width:100%;height:90px;object-fit:contain;background:#f8f1f7;border-radius:8px}.dupe-item .dfname{font-size:11px;white-space:nowrap;overflow-x:auto;margin:5px 0}.dupe-item .dinfo{font-size:11px;opacity:.75;word-break:break-all}.dupe-item .dactions{display:flex;gap:4px;margin-top:6px}.dupe-item .dactions button{flex:1;padding:6px 3px;font-size:11px}.lights{display:flex;gap:4px;margin-top:5px}.light{width:9px;height:9px;border-radius:50%;display:inline-block;opacity:.18}.light.on{opacity:1}.light.size{background:#ff4e59}.light.alias{background:#25b96b}.light.filename{background:#438bff}
 #searchDock input{background:var(--surface);color:var(--ink)}
 
+
+/* 2.1.0 · clearer navigation, movable radial launcher and theme gallery */
+header h1{display:flex;align-items:center;gap:11px}
+.head-menu{width:34px;height:34px;flex:0 0 34px;padding:0;border-radius:12px;background:rgba(255,255,255,.22);color:#fff;font-size:19px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #ffffff30}
+#sideToggle{display:none!important}
+#sidebar{background:var(--surface);color:var(--ink);border-right:1px solid var(--line)}
+#sidebar h2{color:var(--ink);font-weight:750;letter-spacing:.02em}
+#sidebar button{background:var(--side-button,#f5edf7);color:var(--ink);border:1px solid var(--line);font-weight:600}
+#sidebar button.active{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;border-color:transparent}
+.dark #sidebar button{background:#393144;color:#f8efff;border-color:#554860}
+.dark #sidebar button.active{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+.dark #sidebar .sidefoot{color:#cfc1d8;opacity:1}
+#floatNav{position:fixed;left:16px;top:42%;z-index:55;touch-action:none;user-select:none}
+.float-orb{width:46px;height:46px;padding:0;border-radius:50%;display:grid;place-items:center;color:white;background:linear-gradient(145deg,var(--p),var(--p2));box-shadow:0 6px 22px color-mix(in srgb,var(--p) 35%,transparent),inset 0 1px 1px #ffffff80;font-size:20px;border:1px solid #ffffff70;transition:opacity .2s,transform .18s,background .2s;touch-action:none}
+#floatNav.edge-left{left:-22px;opacity:.55}#floatNav.edge-right{left:calc(100vw - 24px);opacity:.55}#floatNav.edge-left .float-orb{transform:translateX(0)}#floatNav.edge-right .float-orb{transform:translateX(-22px)}#floatNav.dragging{opacity:.92!important}#floatNav.open .float-orb{transform:scale(.9) rotate(45deg);opacity:1}
+.float-actions{position:absolute;left:0;top:0;pointer-events:none}
+.float-actions button{position:absolute;left:0;top:0;width:42px;height:42px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;font-size:18px;color:var(--ink);background:var(--surface);border:1px solid var(--line);box-shadow:0 5px 16px #0002;opacity:0;transform:translate(0,0) scale(.25);transition:transform .23s cubic-bezier(.2,.8,.2,1),opacity .16s;transition-delay:calc(var(--i)*18ms)}
+.float-actions button span{font-size:9px;line-height:10px;font-weight:650}
+#floatNav.open .float-actions{pointer-events:auto}
+#floatNav.open .float-actions button{opacity:1;transform:translate(var(--tx),var(--ty)) scale(1)}
+#floatNav.open .float-actions button:nth-child(1){--tx:53px;--ty:-3px}#floatNav.open .float-actions button:nth-child(2){--tx:43px;--ty:47px}#floatNav.open .float-actions button:nth-child(3){--tx:-4px;--ty:57px}#floatNav.open .float-actions button:nth-child(4){--tx:-42px;--ty:34px}
+#floatNav.edge-left.open .float-actions button:nth-child(1){--tx:48px;--ty:-2px}#floatNav.edge-left.open .float-actions button:nth-child(2){--tx:49px;--ty:45px}#floatNav.edge-left.open .float-actions button:nth-child(3){--tx:3px;--ty:57px}#floatNav.edge-left.open .float-actions button:nth-child(4){--tx:48px;--ty:91px}
+#floatNav.edge-right.open .float-actions button:nth-child(1){--tx:-48px;--ty:-2px}#floatNav.edge-right.open .float-actions button:nth-child(2){--tx:-49px;--ty:45px}#floatNav.edge-right.open .float-actions button:nth-child(3){--tx:-3px;--ty:57px}#floatNav.edge-right.open .float-actions button:nth-child(4){--tx:-48px;--ty:91px}
+.float-actions button:active{box-shadow:0 0 0 7px color-mix(in srgb,var(--p) 20%,transparent)}
+#settingsView{display:none}#settingsView.show{display:block}
+.settings-head{padding:6px 4px 15px}.settings-kicker{font-size:10px;letter-spacing:.2em;color:var(--p);font-weight:800}.settings-head h2{font-size:25px;margin:5px 0 7px}.settings-head p{font-size:13px;line-height:1.6;color:var(--muted,#95879f)}
+.settings-card{padding:17px}.settings-card h3{font-size:15px;margin-bottom:12px;color:var(--ink)}
+.theme-choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.theme-choice{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--surface);color:var(--ink);border:1px solid var(--line);padding:11px 5px;font-size:12px}.theme-choice.active{border-color:var(--p);box-shadow:0 0 0 2px color-mix(in srgb,var(--p) 18%,transparent)}.appearance-dot{width:14px;height:14px;border-radius:50%;border:1px solid #a99aaa}.light-dot{background:#fff4fa}.dark-dot{background:#272230}.auto-dot{background:linear-gradient(90deg,#fff4fa 50%,#272230 50%)}
+.theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.theme-tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px}.theme-tile.active{border-color:var(--p);box-shadow:0 0 0 2px color-mix(in srgb,var(--p) 20%,transparent)}.theme-tile b{font-size:12px}.theme-tile small{font-size:10px;color:var(--muted,#95879f);line-height:1.4}.theme-swatch{height:50px;width:100%;border-radius:10px;padding:7px;display:flex;align-items:flex-end;gap:5px}.theme-swatch i{display:block;width:24%;height:17px;border-radius:5px;background:#fff9}.sw-original{background:linear-gradient(130deg,#ff8fb8,#b79cff)}.sw-midnight{background:linear-gradient(130deg,#30283a,#6e548b)}.sw-mint{background:linear-gradient(130deg,#91d7c5,#d1eee1)}.sw-sunshine{background:linear-gradient(130deg,#ffc96f,#ff9f87)}.sw-ocean{background:linear-gradient(130deg,#7296b5,#b7d0df)}
+.version-card{display:flex;align-items:center;gap:10px}.version-card strong{margin-left:auto;font-size:14px;color:var(--p)}.version-card .tip{margin:0}
+/* Palette variables drive all key surfaces and retain strong contrast in either mode. */
+:root{--surface:#fff;--ink:#5b4a63;--line:#f0dfea;--muted:#897990;--side-button:#f8eff7;--p:#ff8fb8;--p2:#b79cff;--soft:#fff0f7;--bg:#fff6fb}
+body.theme-midnight{--p:#c19be8;--p2:#8f8bdc;--soft:#393043}
+body.theme-mint{--p:#55bda4;--p2:#8baddd;--soft:#e4f6ef}
+body.theme-sunshine{--p:#edaa45;--p2:#f18e85;--soft:#fff2d9}
+body.theme-ocean{--p:#739fca;--p2:#8a9bd8;--soft:#e9f2fa}
+body.dark{--bg:#211d29;--surface:#2c2635;--ink:#f5edf9;--line:#51445c;--muted:#c3b5ce;--side-button:#393144;--soft:#382b3c;background:var(--bg);color:var(--ink)}
+body.dark.theme-midnight{--bg:#191720;--surface:#25212e;--ink:#f5effb;--line:#4a4059;--soft:#30283a;--muted:#c9bdd7}
+body.dark.theme-mint{--bg:#172321;--surface:#22312e;--ink:#e9fbf4;--line:#3d5d54;--soft:#293d37;--muted:#b7d6cb}
+body.dark.theme-sunshine{--bg:#292117;--surface:#382c20;--ink:#fff5df;--line:#645039;--soft:#493725;--muted:#e0c9a5}
+body.dark.theme-ocean{--bg:#18212b;--surface:#232f3b;--ink:#edf6ff;--line:#405569;--soft:#2a3a49;--muted:#b7cadb}
+body.dark .card,body.dark .file,body.dark #mbar,body.dark #sheet,body.dark #dlg,body.dark .pop,body.dark #dupeView .dupe-section{background:var(--surface);color:var(--ink);border-color:var(--line)}
+body.dark .tab,body.dark .b-gray,body.dark #dupeView .dupe-head,body.dark #searchResults button{background:var(--side-button);color:var(--ink);border-color:var(--line)}
+body.dark .b-gray{background:#40364a;color:#f8f0ff}
+body.dark .tip,body.dark .settings-head p,body.dark .theme-tile small{color:var(--muted)}
+body.dark input,body.dark textarea{background:var(--bg);color:var(--ink);border-color:var(--line)}
+body.dark #searchDock{background:var(--bg)}body.dark #searchResults button{background:var(--surface);color:var(--ink)}
+body.dark .dupe-item{background:var(--bg);border-color:var(--line)}body.dark .dupe-item img{background:#1c1923}
+body.dark .theme-choice,body.dark .theme-tile{background:var(--surface);color:var(--ink);border-color:var(--line)}
+body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p)}
+@media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb{transition:none}}
+
 </style>
 </head>
 <body>
 <header>
-  <h1>🐰 我的小图床</h1>
+  <h1><button class="head-menu" onclick="toggleSidebar()" aria-label="打开导航">☰</button><span>我的小图床</span></h1>
   <button class="b-white" onclick="loadAll()">🔄 刷新</button>
 </header>
-<button id="sideToggle" class="b-main" onclick="toggleSidebar()" aria-label="打开侧边栏">☰</button>
-<div id="sideMask" onclick="if(event.target===this)toggleSidebar(false)"><nav id="sidebar"><h2>🐰 小图床菜单</h2><button class="active" id="navGallery" onclick="switchPanel('gallery')">🖼️ 我的图库</button><button id="navDupe" onclick="switchPanel('dupes')">🧩 相似图片检测</button><button id="navSettings" onclick="switchPanel('settings')">⚙️ 设置</button><div id="settingsPanel" style="display:none"><div class="tip">当前版本：2.0.0</div><button onclick="toggleDark()">🌙 切换可爱暗色模式</button></div><div class="sidefoot">你的图片仍保存在自己的 GitHub 仓库</div><button onclick="toggleSidebar(false)">收起侧边栏</button></nav></div>
+<div id="floatNav" aria-label="快捷导航">
+  <button id="floatOrb" class="float-orb" aria-label="展开快捷菜单" title="拖动移动，点击展开">☰</button>
+  <div id="floatActions" class="float-actions" aria-hidden="true">
+    <button style="--i:0" onclick="switchPanel('gallery')" title="我的图库">▦<span>图库</span></button>
+    <button style="--i:1" onclick="switchPanel('dupes')" title="相似检测">◎<span>检测</span></button>
+    <button style="--i:2" onclick="switchPanel('settings')" title="主题设置">◐<span>主题</span></button>
+    <button style="--i:3" onclick="startSearchMode()" title="搜索图片">⌕<span>搜索</span></button>
+  </div>
+</div>
+<div id="sideMask" onclick="if(event.target===this)toggleSidebar(false)"><nav id="sidebar"><h2>导航</h2><button class="active" id="navGallery" onclick="switchPanel('gallery')">我的图库</button><button id="navDupe" onclick="switchPanel('dupes')">相似图片检测</button><button id="navSettings" onclick="switchPanel('settings')">设置与主题</button><div class="sidefoot">图片仍保存在你自己的 GitHub 仓库</div><button onclick="toggleSidebar(false)">收起导航</button></nav></div>
 <main>
   <div id="searchDock"><div class="row"><input id="searchInput" type="text" placeholder="🔎 搜索命名或文件名…" oninput="runSearch()"><button class="b-gray" onclick="clearSearch()">×</button></div><div id="searchResults"></div></div>
+  <div id="settingsView" class="settings-view">
+    <div class="settings-head"><div class="settings-kicker">PERSONALIZE</div><h2>设置与主题</h2><p>选一套舒服的配色，明暗模式下都保持清晰易读。</p></div>
+    <div class="card settings-card"><h3>外观模式</h3><div class="theme-choice-row"><button class="theme-choice" onclick="setAppearance('light')" data-appearance="light"><span class="appearance-dot light-dot"></span><span>浅色</span></button><button class="theme-choice" onclick="setAppearance('dark')" data-appearance="dark"><span class="appearance-dot dark-dot"></span><span>暗色</span></button><button class="theme-choice" onclick="setAppearance('auto')" data-appearance="auto"><span class="appearance-dot auto-dot"></span><span>跟随主题</span></button></div></div>
+    <div class="card settings-card"><h3>主题</h3><p class="tip">原生主题也保留了。切换会立即生效并自动记住。</p><div id="themeChoices" class="theme-grid">
+      <button class="theme-tile" data-theme="original" onclick="setTheme('original')"><span class="theme-swatch sw-original"><i></i><i></i><i></i></span><b>原生·奶油粉</b><small>温柔、熟悉的原版</small></button>
+      <button class="theme-tile" data-theme="midnight" onclick="setTheme('midnight')"><span class="theme-swatch sw-midnight"><i></i><i></i><i></i></span><b>午夜莓果</b><small>高级暗色、柔和紫调</small></button>
+      <button class="theme-tile" data-theme="mint" onclick="setTheme('mint')"><span class="theme-swatch sw-mint"><i></i><i></i><i></i></span><b>薄荷清风</b><small>清爽、克制的绿色</small></button>
+      <button class="theme-tile" data-theme="sunshine" onclick="setTheme('sunshine')"><span class="theme-swatch sw-sunshine"><i></i><i></i><i></i></span><b>晴日奶油</b><small>明亮、温暖的阳光感</small></button>
+      <button class="theme-tile" data-theme="ocean" onclick="setTheme('ocean')"><span class="theme-swatch sw-ocean"><i></i><i></i><i></i></span><b>雾蓝海盐</b><small>安静、简约的蓝灰色</small></button>
+    </div></div>
+    <div class="card settings-card version-card"><span>当前版本</span><strong>2.1.0</strong><span class="tip">图床 · 个性化界面</span></div>
+  </div>
   <div id="dupeView"><h2>🧩 相似图片检测</h2><p class="tip">按大小、命名、文件名分组。红灯=大小，绿灯=命名，蓝灯=文件名；重叠项只在优先级更高的分组显示。</p><div class="row" style="margin:12px 0"><button class="b-main" onclick="scanDuplicates('all')">全部检测</button><button class="b-gray" onclick="scanDuplicates('current')">检测当前分类</button></div><div id="dupeResults"></div></div>
   <div id="galleryView">
   <div class="card">
@@ -1551,10 +1623,25 @@ function selAll(){
 /* ===== 新增交互 ===== */
 let panelNow='gallery',searchActive=false,resizeState=null,dupeIgnored=new Set(JSON.parse(lsGet('gh_dupe_ignored')||'[]'));
 function toggleSidebar(force){const m=$('sideMask');if(force===false)m.classList.remove('show');else m.classList.toggle('show');}
-function switchPanel(p){panelNow=p;$('galleryView').classList.toggle('hide',p!=='gallery');$('dupeView').classList.toggle('show',p==='dupes');$('settingsPanel').style.display=p==='settings'?'block':'none';$('navGallery').classList.toggle('active',p==='gallery');$('navDupe').classList.toggle('active',p==='dupes');$('navSettings').classList.toggle('active',p==='settings');toggleSidebar(false);if(p==='dupes'&&!$('dupeResults').innerHTML.trim())scanDuplicates('all');}
-function toggleDark(){document.body.classList.toggle('dark');lsSet('gh_dark',document.body.classList.contains('dark')?'1':'0');toast(document.body.classList.contains('dark')?'已切换可爱暗色模式 🌙':'已切回浅色模式 🌸');}
-if(lsGet('gh_dark')==='1')document.body.classList.add('dark');
-function startSearchMode(){searchActive=true;$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
+function switchPanel(p){panelNow=p;$('galleryView').classList.toggle('hide',p!=='gallery');$('dupeView').classList.toggle('show',p==='dupes');$('settingsView').classList.toggle('show',p==='settings');$('navGallery').classList.toggle('active',p==='gallery');$('navDupe').classList.toggle('active',p==='dupes');$('navSettings').classList.toggle('active',p==='settings');toggleSidebar(false);$('floatNav').classList.remove('open');$('floatActions').setAttribute('aria-hidden','true');if(p==='dupes'&&!$('dupeResults').innerHTML.trim())scanDuplicates('all');if(p==='settings')syncThemeChoices();window.scrollTo({top:0,behavior:'smooth'});}
+function applyAppearance(){const mode=lsGet('gh_appearance')|| (lsGet('gh_dark')==='1'?'dark':'light');document.body.classList.toggle('dark',mode==='dark'||(mode==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches));}
+function setAppearance(mode){lsSet('gh_appearance',mode);lsSet('gh_dark',mode==='dark'?'1':'0');applyAppearance();syncThemeChoices();toast('显示模式已更新');}
+function setTheme(theme){document.body.classList.remove('theme-original','theme-midnight','theme-mint','theme-sunshine','theme-ocean');if(theme!=='original')document.body.classList.add('theme-'+theme);lsSet('gh_theme',theme);syncThemeChoices();toast('已切换主题');}
+function syncThemeChoices(){const mode=lsGet('gh_appearance')||(lsGet('gh_dark')==='1'?'dark':'light');document.querySelectorAll('[data-appearance]').forEach(b=>b.classList.toggle('active',b.dataset.appearance===mode));const t=lsGet('gh_theme')||'original';document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));}
+function toggleDark(){setAppearance(document.body.classList.contains('dark')?'light':'dark');}
+(function initLook(){const t=lsGet('gh_theme')||'original';if(t!=='original')document.body.classList.add('theme-'+t);applyAppearance();})();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if((lsGet('gh_appearance')||'light')==='auto')applyAppearance()});
+/* Floating quick launcher: tap to fan out; drag to reposition; snaps to and partly hides at screen edges. */
+(function initFloatingNav(){const wrap=$('floatNav'),orb=$('floatOrb'),menu=$('floatActions');let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0;
+function place(x,y,save=true){const maxX=Math.max(0,innerWidth-46),maxY=Math.max(8,innerHeight-60);x=Math.max(-22,Math.min(maxX+22,x));y=Math.max(8,Math.min(maxY,y));wrap.style.left=x+'px';wrap.style.top=y+'px';wrap.style.right='auto';wrap.classList.toggle('edge-left',x<8);wrap.classList.toggle('edge-right',x>innerWidth-30);if(save)lsSet('gh_float_pos',JSON.stringify({x,y}));}
+try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
+orb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=wrap.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;downAt=Date.now();orb.setPointerCapture?.(e.pointerId);});
+orb.addEventListener('pointermove',e=>{if(!orb.hasPointerCapture?.(e.pointerId))return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}});
+orb.addEventListener('pointerup',e=>{wrap.classList.remove('dragging');if(moved){const r=wrap.getBoundingClientRect();let x=r.left;if(x<innerWidth/2)x=-22;else x=innerWidth-24;place(x,r.top,true);return;}if(Date.now()-downAt>650)return;wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');});
+window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.min(r.left,innerWidth-24),Math.min(r.top,innerHeight-60),true)});
+document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
+})();
+function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('open');$('floatActions')?.setAttribute('aria-hidden','true');$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
 function clearSearch(){searchActive=false;$('searchInput').value='';$('searchResults').innerHTML='';$('searchDock').classList.remove('show');document.querySelectorAll('.file.search-hit').forEach(c=>c.classList.remove('search-hit'));}
 let searchIndex=null,searchLoading=false;async function runSearch(){const q=$('searchInput').value.trim().toLowerCase(),out=$('searchResults');out.innerHTML='';if(!q){out.textContent='输入命名或文件名进行搜索';return;}if(!searchIndex&&!searchLoading){searchLoading=true;out.textContent='正在搜索整个仓库…';try{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());searchIndex=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}catch(e){searchIndex=items.slice();toast('全仓库搜索失败，暂时搜索当前分类');}finally{searchLoading=false;}}if(searchLoading)return;const source=searchIndex||items;const all=source.filter(f=>(names[f.path]||'').toLowerCase().includes(q)||disp(f.name).toLowerCase().includes(q)||f.name.toLowerCase().includes(q));if(!all.length){out.textContent='没有找到匹配的文件';return;}all.slice(0,100).forEach(f=>{const b=document.createElement('button');b.textContent=(names[f.path]||disp(f.name))+' · '+catName(dirOfPath(f.path));b.onclick=()=>{if(dirOfPath(f.path)!==curDir){curDir=dirOfPath(f.path);loadAll().then(()=>jumpToPath(f.path));}else jumpToPath(f.path);};out.appendChild(b);});}
 function jumpToPath(path){const c=[...document.querySelectorAll('.file')].find(x=>x.dataset.path===path);if(!c){toast('当前分类中暂时找不到这张图');return;}c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1500);}
