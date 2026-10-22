@@ -349,8 +349,8 @@ body.dark .head-menu{background:#ffffff20;border-color:#ffffff48}
 
 /* Final polish: compact more button attached to the inside of the outer card frame. */
 .file>.more{
-  top:6px !important;
-  right:7px !important;
+  top:1px !important;
+  right:5px !important;
   width:29px !important;
   height:25px !important;
   min-width:0;
@@ -1757,12 +1757,10 @@ function syncThemeChoices(){const mode=lsGet('gh_appearance')||(lsGet('gh_dark')
 function toggleDark(){setAppearance(document.body.classList.contains('dark')?'light':'dark');}
 (function initLook(){const t=lsGet('gh_theme')||'original';if(t!=='original')document.body.classList.add('theme-'+t);applyAppearance();})();
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if((lsGet('gh_appearance')||'light')==='auto')applyAppearance()});
-/* Floating quick launcher: freely positionable, with four shortcut bubbles arranged around the orb. */
+/* Floating launcher: drag any satellite to rotate the whole radial group, never scatter individual buttons. */
 (function initFloatingNav(){
   const wrap=$('floatNav'),orb=$('floatOrb'),menu=$('floatActions'),buttons=[...menu.querySelectorAll('button')];
-  let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0;
-  const bubbleKey='gh_float_bubble_positions';
-  const readBubblePositions=()=>{try{return JSON.parse(lsGet(bubbleKey)||'{}')}catch(_){return {}}};
+  let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0,rotation=0;
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   function place(x,y,save=true){
     const maxX=Math.max(-23,innerWidth-23),maxY=Math.max(8,innerHeight-54);
@@ -1774,88 +1772,31 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
   }
   function positionActions(){
     const r=wrap.getBoundingClientRect(),orbSize=46,btnSize=42,radius=61;
-    const angles=[-90,0,90,180],saved=readBubblePositions();
     const cx0=r.left+orbSize/2,cy0=r.top+orbSize/2;
-    const nearEdge=cx0<84||cx0>innerWidth-84||cy0<84||cy0>innerHeight-84;
-    let anglesToUse=angles;
-    if(nearEdge){
-      const inward=Math.atan2(innerHeight/2-cy0,innerWidth/2-cx0)*180/Math.PI;
-      anglesToUse=[inward-68,inward-23,inward+23,inward+68];
-    }
     buttons.forEach((b,i)=>{
-      let left,top;
-      const custom=saved[i];
-      if(custom&&Number.isFinite(custom.x)&&Number.isFinite(custom.y)){
-        left=clamp(custom.x,6,Math.max(6,innerWidth-btnSize-6));
-        top=clamp(custom.y,8,Math.max(8,innerHeight-btnSize-8));
-      }else{
-        const angle=anglesToUse[i]*Math.PI/180;
-        const cx0b=r.left+orbSize/2,cy0b=r.top+orbSize/2;
-        const cx=cx0b+Math.cos(angle)*radius,cy=cy0b+Math.sin(angle)*radius;
-        left=clamp(cx-btnSize/2,6,Math.max(6,innerWidth-btnSize-6));
-        top=clamp(cy-btnSize/2,8,Math.max(8,innerHeight-btnSize-8));
-      }
-      b.style.setProperty('--tx',(left-r.left)+'px');
-      b.style.setProperty('--ty',(top-r.top)+'px');
+      const angle=(rotation+[-90,0,90,180][i])*Math.PI/180;
+      let cx=cx0+Math.cos(angle)*radius,cy=cy0+Math.sin(angle)*radius;
+      // Keep each bubble visible; the radial order remains fixed around the same center.
+      cx=clamp(cx,btnSize/2+5,innerWidth-btnSize/2-5);
+      cy=clamp(cy,btnSize/2+5,innerHeight-btnSize/2-5);
+      b.style.setProperty('--tx',(cx-btnSize/2-r.left)+'px');
+      b.style.setProperty('--ty',(cy-btnSize/2-r.top)+'px');
     });
   }
-  try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
+  try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false);rotation=Number(lsGet('gh_float_rotation')||0)||0;}catch(e){place(16,innerHeight*.42,false)}
   orb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=wrap.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;downAt=Date.now();orb.setPointerCapture?.(e.pointerId);});
-  orb.addEventListener('pointermove',e=>{
-    if(!orb.hasPointerCapture?.(e.pointerId))return;
-    const dx=e.clientX-sx,dy=e.clientY-sy;
-    if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}
-  });
-  orb.addEventListener('pointerup',e=>{
-    wrap.classList.remove('dragging');
-    if(moved){
-      const r=wrap.getBoundingClientRect();let x=r.left;
-      if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;
-      place(x,r.top,true);return;
-    }
-    if(Date.now()-downAt>650)return;
-    wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');
-    if(wrap.classList.contains('open'))positionActions();
-  });
-  // Every shortcut bubble can be moved separately. Its screen position is saved independently,
-  // and a drag suppresses the click action so it will not navigate by accident.
+  orb.addEventListener('pointermove',e=>{if(!orb.hasPointerCapture?.(e.pointerId))return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}});
+  orb.addEventListener('pointerup',e=>{wrap.classList.remove('dragging');if(moved){const r=wrap.getBoundingClientRect();let x=r.left;if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;place(x,r.top,true);return;}if(Date.now()-downAt>650)return;wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');if(wrap.classList.contains('open'))positionActions();});
+  // Dragging any satellite rotates the complete orbit; button spacing/order stays consistent.
   buttons.forEach((b,i)=>{
     let d=null;
-    b.addEventListener('pointerdown',e=>{
-      const r=b.getBoundingClientRect();
-      d={id:e.pointerId,sx:e.clientX,sy:e.clientY,x:r.left,y:r.top,moved:false};
-      try{b.setPointerCapture?.(e.pointerId)}catch(_){}
-    });
-    b.addEventListener('pointermove',e=>{
-      if(!d||d.id!==e.pointerId)return;
-      const dx=e.clientX-d.sx,dy=e.clientY-d.sy;
-      if(!d.moved&&Math.hypot(dx,dy)>6){d.moved=true;b.classList.add('bubble-dragging');}
-      if(!d.moved)return;
-      if(e.cancelable)e.preventDefault();
-      const left=clamp(d.x+dx,6,Math.max(6,innerWidth-48));
-      const top=clamp(d.y+dy,8,Math.max(8,innerHeight-50));
-      const wr=wrap.getBoundingClientRect();
-      b.style.setProperty('--tx',(left-wr.left)+'px');b.style.setProperty('--ty',(top-wr.top)+'px');
-    });
-    const finishBubbleDrag=e=>{
-      if(!d||d.id!==e.pointerId)return;
-      if(d.moved){
-        const r=b.getBoundingClientRect(),positions=readBubblePositions();
-        positions[i]={x:clamp(r.left,6,Math.max(6,innerWidth-48)),y:clamp(r.top,8,Math.max(8,innerHeight-50))};
-        lsSet(bubbleKey,JSON.stringify(positions));
-        b._suppressClick=true;
-        setTimeout(()=>{b._suppressClick=false;},700);
-      }
-      b.classList.remove('bubble-dragging');d=null;
-    };
-    b.addEventListener('pointerup',finishBubbleDrag);
-    b.addEventListener('pointercancel',finishBubbleDrag);
+    b.addEventListener('pointerdown',e=>{const r=wrap.getBoundingClientRect(),cx=r.left+23,cy=r.top+23;d={id:e.pointerId,sx:e.clientX,sy:e.clientY,cx,cy,start:Math.atan2(e.clientY-cy,e.clientX-cx)*180/Math.PI,rotation,moved:false};try{b.setPointerCapture?.(e.pointerId)}catch(_){};});
+    b.addEventListener('pointermove',e=>{if(!d||d.id!==e.pointerId)return;if(!d.moved&&Math.hypot(e.clientX-d.sx,e.clientY-d.sy)>6){d.moved=true;b.classList.add('bubble-dragging');}if(!d.moved)return;if(e.cancelable)e.preventDefault();const a=Math.atan2(e.clientY-d.cy,e.clientX-d.cx)*180/Math.PI;rotation=d.rotation+(a-d.start);positionActions();});
+    const finish=e=>{if(!d||d.id!==e.pointerId)return;if(d.moved){lsSet('gh_float_rotation',String(rotation));b._suppressClick=true;setTimeout(()=>b._suppressClick=false,700);}b.classList.remove('bubble-dragging');d=null;};
+    b.addEventListener('pointerup',finish);b.addEventListener('pointercancel',finish);
     b.addEventListener('click',e=>{if(b._suppressClick){e.preventDefault();e.stopImmediatePropagation();b._suppressClick=false;}},true);
   });
-  window.addEventListener('resize',()=>{
-    const r=wrap.getBoundingClientRect();place(clamp(r.left,-23,innerWidth-23),clamp(r.top,8,innerHeight-54),true);
-    if(wrap.classList.contains('open'))positionActions();
-  });
+  window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(clamp(r.left,-23,innerWidth-23),clamp(r.top,8,innerHeight-54),true);if(wrap.classList.contains('open'))positionActions();});
   document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
 })();
 function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('open');$('floatActions')?.setAttribute('aria-hidden','true');$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
