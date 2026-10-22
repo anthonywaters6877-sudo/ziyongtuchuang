@@ -287,25 +287,85 @@ body.dark .theme-choice,body.dark .theme-tile{background:var(--surface);color:va
 body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p)}
 @media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb{transition:none}}
 
+
+/* 2.2.0 · glassmorphism polish, minimal line icon system, free-floating radial launcher */
+.stat-heading{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px!important;line-height:1.55;margin-bottom:12px}
+.stat-heading .stat-symbol{width:30px;height:30px;display:inline-grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--p) 12%,var(--surface));color:var(--p)}
+.stat-heading .ui-icon{width:18px;height:18px}
+.stat-heading b{font-size:19px;color:var(--p2);letter-spacing:.015em}
+#pstat{display:flex;align-items:center;gap:6px}
+#pstat:before{content:"";display:inline-block;width:6px;height:6px;flex:none;border-radius:50%;background:var(--p);box-shadow:0 0 0 4px color-mix(in srgb,var(--p) 14%,transparent)}
+
+:root{--glass-shadow:0 14px 38px rgba(29,20,46,.10);--glass-border:color-mix(in srgb,var(--line) 72%,white 28%);--glass-fill:color-mix(in srgb,var(--surface) 88%,transparent)}
+body{background:radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--p) 12%,transparent),transparent 34%),radial-gradient(ellipse at 100% 38%,color-mix(in srgb,var(--p2) 10%,transparent),transparent 34%),var(--bg);background-attachment:fixed}
+header{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(118deg,color-mix(in srgb,var(--p) 88%,white 12%),color-mix(in srgb,var(--p2) 87%,white 13%));border-radius:0 0 30px 30px;box-shadow:0 12px 32px color-mix(in srgb,var(--p2) 22%,transparent);padding:19px 18px 22px}
+header:after{content:"";position:absolute;z-index:-1;width:230px;height:230px;right:-85px;top:-150px;border:1px solid #ffffff40;border-radius:50%;box-shadow:0 0 0 20px #ffffff0a,0 0 0 42px #ffffff08}
+header h1{font-size:20px;font-weight:760;letter-spacing:.025em;gap:12px}
+.ui-icon{display:inline-block;width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.head-menu{width:40px;height:40px;flex-basis:40px;border-radius:14px;background:rgba(255,255,255,.20);border:1px solid #ffffff60;backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 #ffffff65,0 3px 12px #44365a12}
+.menu-lines{width:20px;height:20px}
+.refresh-btn{display:flex;align-items:center;gap:7px;min-height:42px;padding:9px 14px;background:#ffffff28;border:1px solid #ffffff50;backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 #ffffff45;color:#fff;font-weight:650}
+.refresh-btn .ui-icon{width:17px;height:17px}
+.card{background:var(--glass-fill);backdrop-filter:blur(18px) saturate(1.12);-webkit-backdrop-filter:blur(18px) saturate(1.12);border:1px solid var(--glass-border);border-radius:24px;box-shadow:var(--glass-shadow),inset 0 1px 0 color-mix(in srgb,white 18%,transparent);padding:18px;}
+.card h2{font-size:16px;font-weight:750;letter-spacing:.01em}
+.section-heading{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:770;letter-spacing:.01em;margin:5px 4px 12px}
+.section-heading .ui-icon{width:20px;height:20px;color:var(--p);stroke-width:1.85}
+.gallery-title{margin-top:8px}
+input[type=password],input[type=text],#sheet textarea{background:color-mix(in srgb,var(--surface) 82%,transparent);border:1px solid var(--line);border-radius:15px;box-shadow:inset 0 1px 2px #15102008;color:var(--ink)}
+input:focus{border-color:var(--p);box-shadow:0 0 0 3px color-mix(in srgb,var(--p) 17%,transparent)}
+.b-main{background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:0 4px 12px color-mix(in srgb,var(--p) 20%,transparent);font-weight:650}
+.b-white,.b-gray,.b-red{font-weight:600}
+.b-gray{background:color-mix(in srgb,var(--surface) 82%,var(--soft));border:1px solid var(--line);color:var(--ink)}
+#target{font-size:12px;line-height:1.6;margin:2px 0 10px;color:var(--muted)}
+#drop{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:25px 14px 23px;border:1.5px dashed color-mix(in srgb,var(--p) 78%,var(--p2));border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--p) 7%,var(--surface)),color-mix(in srgb,var(--p2) 8%,var(--surface)));color:var(--ink);text-align:center;transition:border-color .18s,transform .18s,background .18s;box-shadow:inset 0 1px 0 #ffffff24}
+#drop.over{border-style:solid;background:color-mix(in srgb,var(--p) 13%,var(--surface));transform:scale(.995)}
+.drop-symbol{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:var(--p);background:linear-gradient(140deg,color-mix(in srgb,var(--p) 18%,var(--surface)),color-mix(in srgb,var(--p2) 22%,var(--surface)));border:1px solid color-mix(in srgb,var(--p) 25%,var(--line));box-shadow:inset 0 1px 0 #ffffff4a,0 7px 18px color-mix(in srgb,var(--p) 11%,transparent)}
+.drop-symbol .ui-icon{width:24px;height:24px;stroke-width:1.6}
+#drop strong{font-size:16px;font-weight:750;letter-spacing:.02em}
+#drop .drop-subtitle{font-size:13px;color:var(--muted)}
+#drop .tip{line-height:1.7;margin-top:0;color:var(--muted)}
+#floatNav{position:fixed;width:46px;height:46px;z-index:70;isolation:isolate}
+.float-orb{position:relative;z-index:2;width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--p) 78%,var(--p2));border:1px solid #ffffff8a;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 9px 25px color-mix(in srgb,var(--p) 25%,transparent),inset 0 1px 1px #ffffffb3;color:white;transition:transform .18s ease,opacity .18s ease;touch-action:none}
+.orb-mark{width:24px;height:24px;fill:currentColor;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+#floatNav.open .float-orb{transform:rotate(45deg) scale(.92);box-shadow:0 0 0 7px color-mix(in srgb,var(--p) 13%,transparent),0 9px 25px color-mix(in srgb,var(--p) 26%,transparent)}
+#floatNav.edge-left .float-orb,#floatNav.edge-right .float-orb{opacity:.52}
+#floatNav.dragging{opacity:.95!important;transition:none}
+.float-actions{position:absolute;inset:0;z-index:1;pointer-events:none}
+.float-actions button{position:absolute;left:0;top:0;width:42px;height:42px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;font-size:18px;color:var(--ink);background:color-mix(in srgb,var(--surface) 82%,transparent);border:1px solid color-mix(in srgb,var(--p) 34%,var(--line));backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);box-shadow:0 7px 21px #120d201f,inset 0 1px 0 #ffffff20;opacity:0;transform:translate(0,0) scale(.2);transition:transform .19s cubic-bezier(.2,.8,.2,1),opacity .13s ease;transition-delay:calc(var(--i)*12ms);will-change:transform}
+.float-actions button .ui-icon{width:18px;height:18px;color:var(--p);stroke-width:1.8}
+.float-actions button span{font-size:9px;line-height:10px;font-weight:700;letter-spacing:.01em}
+#floatNav.open .float-actions{pointer-events:auto}
+#floatNav.open .float-actions button{opacity:1;transform:translate(var(--tx),var(--ty)) scale(1)}
+.float-actions button:active{box-shadow:0 0 0 6px color-mix(in srgb,var(--p) 18%,transparent),0 7px 21px #120d201f}
+body.dark{--glass-shadow:0 16px 38px rgba(0,0,0,.20);--glass-border:color-mix(in srgb,var(--line) 82%,white 4%);--glass-fill:color-mix(in srgb,var(--surface) 89%,transparent);background:radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--p) 12%,transparent),transparent 34%),radial-gradient(ellipse at 100% 38%,color-mix(in srgb,var(--p2) 10%,transparent),transparent 34%),var(--bg)}
+body.dark .card{background:var(--glass-fill);border-color:var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 #ffffff08}
+body.dark #drop{background:linear-gradient(145deg,color-mix(in srgb,var(--p) 9%,var(--surface)),color-mix(in srgb,var(--p2) 7%,var(--surface)));color:var(--ink);border-color:color-mix(in srgb,var(--p) 72%,var(--line))}
+body.dark #drop .tip,body.dark #drop .drop-subtitle{color:var(--muted)}
+body.dark .float-actions button{background:color-mix(in srgb,var(--surface) 85%,transparent);color:var(--ink);border-color:color-mix(in srgb,var(--p) 42%,var(--line));box-shadow:0 8px 22px #0004,inset 0 1px 0 #ffffff0c}
+body.dark .b-gray{background:color-mix(in srgb,var(--surface) 78%,var(--line));color:var(--ink);border-color:var(--line)}
+body.dark .head-menu{background:#ffffff20;border-color:#ffffff48}
+@media(max-width:420px){header{padding:16px 15px 20px}header h1{font-size:19px}.card{padding:16px;border-radius:22px}#floatNav{z-index:70}}
+@media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb,#drop{transition:none!important}}
+
 </style>
 </head>
 <body>
 <header>
-  <h1><button class="head-menu" onclick="toggleSidebar()" aria-label="打开导航">☰</button><span>我的小图床</span></h1>
-  <button class="b-white" onclick="loadAll()">🔄 刷新</button>
+  <h1><button class="head-menu" onclick="toggleSidebar()" aria-label="打开导航"><svg class="ui-icon menu-lines" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><span>我的小图床</span></h1>
+  <button class="b-white refresh-btn" onclick="loadAll()"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.2 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 11.8-3"/></svg><span>刷新</span></button>
 </header>
 <div id="floatNav" aria-label="快捷导航">
-  <button id="floatOrb" class="float-orb" aria-label="展开快捷菜单" title="拖动移动，点击展开">☰</button>
+  <button id="floatOrb" class="float-orb" aria-label="展开快捷菜单" title="拖动移动，点击展开"><svg class="orb-mark" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="4"/><circle cx="24" cy="8" r="2.5"/><circle cx="40" cy="24" r="2.5"/><circle cx="24" cy="40" r="2.5"/><circle cx="8" cy="24" r="2.5"/><path d="M24 13v7M35 24h-7M24 35v-7M13 24h7"/></svg></button>
   <div id="floatActions" class="float-actions" aria-hidden="true">
-    <button style="--i:0" onclick="switchPanel('gallery')" title="我的图库">▦<span>图库</span></button>
-    <button style="--i:1" onclick="switchPanel('dupes')" title="相似检测">◎<span>检测</span></button>
-    <button style="--i:2" onclick="switchPanel('settings')" title="主题设置">◐<span>主题</span></button>
-    <button style="--i:3" onclick="startSearchMode()" title="搜索图片">⌕<span>搜索</span></button>
+    <button style="--i:0" onclick="switchPanel('gallery')" title="我的图库"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg><span>图库</span></button>
+    <button style="--i:1" onclick="switchPanel('dupes')" title="相似检测"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><circle cx="14" cy="14" r="6.5"/></svg><span>检测</span></button>
+    <button style="--i:2" onclick="switchPanel('settings')" title="主题设置"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z"/></svg><span>主题</span></button>
+    <button style="--i:3" onclick="startSearchMode()" title="搜索图片"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span>搜索</span></button>
   </div>
 </div>
 <div id="sideMask" onclick="if(event.target===this)toggleSidebar(false)"><nav id="sidebar"><h2>导航</h2><button class="active" id="navGallery" onclick="switchPanel('gallery')">我的图库</button><button id="navDupe" onclick="switchPanel('dupes')">相似图片检测</button><button id="navSettings" onclick="switchPanel('settings')">设置与主题</button><div class="sidefoot">图片仍保存在你自己的 GitHub 仓库</div><button onclick="toggleSidebar(false)">收起导航</button></nav></div>
 <main>
-  <div id="searchDock"><div class="row"><input id="searchInput" type="text" placeholder="🔎 搜索命名或文件名…" oninput="runSearch()"><button class="b-gray" onclick="clearSearch()">×</button></div><div id="searchResults"></div></div>
+  <div id="searchDock"><div class="row"><input id="searchInput" type="text" placeholder="搜索自定义名称或文件名…" oninput="runSearch()"><button class="b-gray" onclick="clearSearch()">×</button></div><div id="searchResults"></div></div>
   <div id="settingsView" class="settings-view">
     <div class="settings-head"><div class="settings-kicker">PERSONALIZE</div><h2>设置与主题</h2><p>选一套舒服的配色，明暗模式下都保持清晰易读。</p></div>
     <div class="card settings-card"><h3>外观模式</h3><div class="theme-choice-row"><button class="theme-choice" onclick="setAppearance('light')" data-appearance="light"><span class="appearance-dot light-dot"></span><span>浅色</span></button><button class="theme-choice" onclick="setAppearance('dark')" data-appearance="dark"><span class="appearance-dot dark-dot"></span><span>暗色</span></button><button class="theme-choice" onclick="setAppearance('auto')" data-appearance="auto"><span class="appearance-dot auto-dot"></span><span>跟随主题</span></button></div></div>
@@ -316,12 +376,12 @@ body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p
       <button class="theme-tile" data-theme="sunshine" onclick="setTheme('sunshine')"><span class="theme-swatch sw-sunshine"><i></i><i></i><i></i></span><b>晴日奶油</b><small>明亮、温暖的阳光感</small></button>
       <button class="theme-tile" data-theme="ocean" onclick="setTheme('ocean')"><span class="theme-swatch sw-ocean"><i></i><i></i><i></i></span><b>雾蓝海盐</b><small>安静、简约的蓝灰色</small></button>
     </div></div>
-    <div class="card settings-card version-card"><span>当前版本</span><strong>2.1.0</strong><span class="tip">图床 · 个性化界面</span></div>
+    <div class="card settings-card version-card"><span>当前版本</span><strong>2.2.0</strong><span class="tip">图床 · 个性化界面</span></div>
   </div>
-  <div id="dupeView"><h2>🧩 相似图片检测</h2><p class="tip">按大小、命名、文件名分组。红灯=大小，绿灯=命名，蓝灯=文件名；重叠项只在优先级更高的分组显示。</p><div class="row" style="margin:12px 0"><button class="b-main" onclick="scanDuplicates('all')">全部检测</button><button class="b-gray" onclick="scanDuplicates('current')">检测当前分类</button></div><div id="dupeResults"></div></div>
+  <div id="dupeView"><h2 class="section-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="10" height="12" rx="2"/><rect x="10.5" y="8" width="10" height="12" rx="2"/><path d="m6 13 2-2 2 2"/></svg>相似图片检测</h2><p class="tip">按大小、命名、文件名分组。红灯=大小，绿灯=命名，蓝灯=文件名；重叠项只在优先级更高的分组显示。</p><div class="row" style="margin:12px 0"><button class="b-main" onclick="scanDuplicates('all')">全部检测</button><button class="b-gray" onclick="scanDuplicates('current')">检测当前分类</button></div><div id="dupeResults"></div></div>
   <div id="galleryView">
   <div class="card">
-    <h2>🔑 Token 设置</h2>
+    <h2 class="section-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="m11.2 12.3 8.3-8.3 2.5 2.5-2 2 1.5 1.5-2.4 2.4-1.5-1.5-3.2 3.2"/></svg>Token 设置</h2>
     <div class="row">
       <input type="password" id="token" placeholder="粘贴 GitHub Token（ghp_ 开头）">
       <button class="b-main" onclick="saveToken()">保存</button>
@@ -330,9 +390,9 @@ body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p
   </div>
 
   <div class="card">
-    <h2>⬆️ 上传文件</h2>
+    <h2 class="section-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>上传文件</h2>
     <div id="target"></div>
-    <div id="drop">🌸 点击选择文件，或拖到这里（可多选）<div class="tip">图片：jpg png gif webp svg bmp ico　音频：mp3 wav m4a ogg flac aac</div></div>
+    <div id="drop"><span class="drop-symbol"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m5.5 17 5-5 3 3 2-2 3 4"/></svg></span><strong>添加文件</strong><span class="drop-subtitle">点击选择，或拖放到这里 · 支持多选</span><div class="tip">图片 JPG、PNG、GIF、WEBP、SVG 等<br>音频 MP3、WAV、M4A、OGG 等</div></div>
     <input type="file" id="picker" multiple hidden accept="image/*,audio/*,.heic,.heif,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.mp3,.wav,.m4a,.ogg,.flac,.aac">
     <div id="qbox">
       <div id="qhead" onclick="$('qbox').classList.toggle('open')">
@@ -341,27 +401,27 @@ body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p
       <div id="qall"><i></i></div>
       <div id="qbody">
         <div id="qtools">
-          <button class="b-gray b-mini" onclick="retryAll()">🔁 重试全部失败</button>
+          <button class="b-gray b-mini" onclick="retryAll()">重试全部失败</button>
           <button class="b-gray b-mini" id="qfilter" onclick="toggleFilter()">只看失败的</button>
-          <button class="b-gray b-mini" onclick="clearOk()">🧹 清除成功记录</button>
+          <button class="b-gray b-mini" onclick="clearOk()">清除成功记录</button>
         </div>
         <div id="qlist"></div>
       </div>
     </div>
   </div>
 
-  <h2 style="font-size:16px;margin:4px 4px 10px">📁 我的图库</h2>
-  <div class="card" id="stat"><div class="tip">📊 用量统计加载中…</div></div>
+  <h2 class="section-heading gallery-title"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h4l2 2h6a2.5 2.5 0 0 1 2.5 2.5v8A2.5 2.5 0 0 1 18 20H6a2.5 2.5 0 0 1-2.5-2.5z"/></svg>我的图库</h2>
+  <div class="card" id="stat"><div class="tip">用量统计加载中…</div></div>
   <div id="tabs"></div>
   <div id="bar2">
     <span id="count"></span>
     <span>
-      <button class="b-gray b-mini" onclick="startSearchMode()">🔎 搜索图片</button>
-      <button class="b-gray b-mini" onclick="reloadAll()">🔄 重新加载图片</button>
-      <button class="b-gray b-mini" onclick="checkAll()">🩺 检查全部</button>
-      <button class="b-gray b-mini" id="hlBtn" onclick="toggleHl()">🔎 标出未命名</button>
-      <button class="b-gray b-mini" id="manageBtn" onclick="toggleManage()">☑️ 批量管理</button>
-      <button class="b-red b-mini" id="delCatBtn" onclick="delCat()" style="display:none">🗑️ 删除此分类</button>
+      <button class="b-gray b-mini" onclick="startSearchMode()">搜索图片</button>
+      <button class="b-gray b-mini" onclick="reloadAll()">重新加载</button>
+      <button class="b-gray b-mini" onclick="checkAll()">检查文件</button>
+      <button class="b-gray b-mini" id="hlBtn" onclick="toggleHl()">标出未命名</button>
+      <button class="b-gray b-mini" id="manageBtn" onclick="toggleManage()">批量管理</button>
+      <button class="b-red b-mini" id="delCatBtn" onclick="delCat()" style="display:none">删除分类</button>
     </span>
   </div>
   <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">⏭ 下一张未命名</button></div>
@@ -376,10 +436,10 @@ body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p
     <button class="b-gray" onclick="toggleManage()">完成</button>
   </div>
   <div class="mrow act">
-    <button class="b-main" onclick="openMove()">📦 移动</button>
-    <button class="b-main" onclick="openExport()">📤 导出</button>
-    <button class="b-main" onclick="checkSelected()">🩺 检查</button>
-    <button class="b-red" onclick="delSelected()">🗑️ 删除</button>
+    <button class="b-main" onclick="openMove()">移动</button>
+    <button class="b-main" onclick="openExport()">导出</button>
+    <button class="b-main" onclick="checkSelected()">检查</button>
+    <button class="b-red" onclick="delSelected()">删除</button>
   </div>
 </div>
 
@@ -602,7 +662,7 @@ async function loadAll(){
     grid.innerHTML='<div class="empty" style="color:#e0405a">加载失败：'+err.message+'</div>';
   }
 }
-function renderTarget(){$("target").textContent="📂 当前上传到：【"+catName(upDir())+"】（先在下面点好分类再上传）";}
+function renderTarget(){$("target").textContent="上传目标  /  "+catName(upDir())+"（先选择分类，再添加文件）";}
 
 function renderTabs(){
   const box=$("tabs");box.innerHTML="";
@@ -887,7 +947,7 @@ function genExport(){
 function renderExport(){
   const symOn=["box","txt","docx"].includes(exp.fmt);
   const chip=(on,fn,label)=>`<button class="${on?"on":"b-gray"}" onclick="${fn}">${label}</button>`;
-  $("sheet").innerHTML=`<h3>📤 导出 ${exp.list.length} 张</h3>
+  $("sheet").innerHTML=`<h3>导出 ${exp.list.length} 张</h3>
   <div class="lab">① 导出方式</div>
   <div class="chips">${EXP_FMTS.map(([k,l])=>chip(k===exp.fmt,`setExp('fmt','${k}')`,l)).join("")}</div>
   <div class="lab">② 名字和链接之间的符号${symOn?"":"（JSON/CSV 不用选）"}</div>
@@ -895,7 +955,7 @@ function renderExport(){
   <div class="lab">③ 内容（可以直接修改）</div>
   <textarea id="expText"></textarea>
   <div class="tip">没命名的图片只导出纯链接。切换上面的选项会重新生成内容，之前手改的会丢。</div>
-  <div class="actrow"><button class="b-main" onclick="expCopy()">📋 一键复制</button>${exp.fmt!=="box"?'<button class="b-main" onclick="expDownload()">💾 下载文件</button>':""}<button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
+  <div class="actrow"><button class="b-main" onclick="expCopy()">一键复制</button>${exp.fmt!=="box"?'<button class="b-main" onclick="expDownload()">下载文件</button>':""}<button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("expText").value=genExport();
 }
 function expCopy(){copy($("expText").value,"已复制 ✅");}
@@ -964,21 +1024,21 @@ async function loadStats(){
     });
     stats=st;renderTabs();renderStat();
   }catch(e){
-    $("stat").innerHTML='<div class="tip">📊 用量统计加载失败：'+e.message+'</div>';
+    $("stat").innerHTML='<div class="tip">用量统计加载失败：'+e.message+'</div>';
   }
 }
 function renderStat(){
   if(!stats)return;
   const pct=Math.min(100,stats.total/LIMIT*100);
   const color=pct>90?"#ff5c6c":pct>70?"#ffb44c":"";
-  $("stat").innerHTML=`<div class="big">📊 图床总用量：<b>${fmtSize(stats.total)}</b> / 建议上限 1 GB（${pct.toFixed(1)}%）</div>
+  $("stat").innerHTML=`<div class="big stat-heading"><span class="stat-symbol" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><rect x="7" y="12" width="3" height="5" rx=".7"/><rect x="12" y="8" width="3" height="9" rx=".7"/><rect x="17" y="4" width="3" height="13" rx=".7"/></svg></span><span>图床总用量</span><b>${fmtSize(stats.total)}</b><span>/ 建议上限 1 GB（${pct.toFixed(1)}%）</span></div>
   <div id="statbar"><i style="width:${pct}%;${color?"background:"+color:""}"></i></div>
   <div class="tip">共 ${stats.count} 个图片/音频文件。上面每个分类标签后面的数字是该分类的大小。${stats.truncated?"（文件太多，统计可能不完整）":""}<br>提示：删掉的文件还会留在 GitHub 的历史记录里，仓库真实占用可能比这里大一点。</div>
-  <div class="tip" id="pstat">🌐 网站发布状态：查询中…</div>
+  <div class="tip" id="pstat">网站发布状态：查询中…</div>
   <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="b-gray b-mini" onclick="rebuildPages()">🔁 重新发布网站</button>
-    <button class="b-gray b-mini" onclick="cleanHistory()">🧹 清理历史记录</button>
-    <button class="b-gray b-mini" onclick="backupNames()">☁️ 备份名字和排序</button>
+    <button class="b-gray b-mini" onclick="rebuildPages()">重新发布网站</button>
+    <button class="b-gray b-mini" onclick="cleanHistory()">清理历史记录</button>
+    <button class="b-gray b-mini" onclick="backupNames()">备份名字和排序</button>
     <button class="b-gray b-mini" onclick="restoreNames()">⬇️ 恢复名字和排序</button></div>`;
   loadPagesStatus();
 }
@@ -1007,7 +1067,7 @@ async function loadPagesStatus(){
     const j=await gh("GET",REPO_API+"pages/builds/latest");
     const map={built:"✅ 已发布",building:"⏳ 发布中",queued:"⏳ 排队中",errored:"❌ 出错"};
     const t=new Date(j.updated_at||j.created_at).toLocaleString();
-    el.textContent="🌐 网站发布状态："+(map[j.status]||j.status)+(j.error&&j.error.message?"："+j.error.message:"")+"（"+t+"）";
+    el.textContent="网站发布状态："+(map[j.status]||j.status)+(j.error&&j.error.message?"："+j.error.message:"")+"（"+t+"）";
   }catch(e){el.textContent="🌐 网站发布状态：查不到（"+e.message+"）";}
 }
 async function rebuildPages(){
@@ -1116,12 +1176,12 @@ function openReport(){
   const bad=vals.filter(r=>!r.ok);
   const cnt=c=>bad.filter(r=>r.code===c).length;
   const unpub=cnt("unpub"),broken=cnt("empty")+cnt("bad"),net=cnt("net");
-  let h=`<h3>🩺 检查结果</h3><div class="tip" style="font-size:13px">共检查 ${vals.length} 张，正常 ${vals.length-bad.length} 张，有问题 ${bad.length} 张。有问题的图片下面已经标出原因。</div>`;
-  if(unpub)h+=`<div class="lab">🌐 网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">🔁 重新发布网站</button></div>`;
-  if(broken)h+=`<div class="lab">💔 文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">🛠 尝试修复</button><button class="b-red" onclick="cleanBad()">🧹 清理</button></div>`;
+  let h=`<h3>检查结果</h3><div class="tip" style="font-size:13px">共检查 ${vals.length} 张，正常 ${vals.length-bad.length} 张，有问题 ${bad.length} 张。有问题的图片下面已经标出原因。</div>`;
+  if(unpub)h+=`<div class="lab">🌐 网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">重新发布网站</button></div>`;
+  if(broken)h+=`<div class="lab">💔 文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">尝试修复</button><button class="b-red" onclick="cleanBad()">清理</button></div>`;
   if(net)h+=`<div class="lab">📶 网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
   if(!bad.length)h+=`<div class="lab">🎉 全部正常</div>`;
-  h+=`<div class="actrow"><button class="b-gray" onclick="closeSheet();checkList(reportList)">🔍 重新检查</button><button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
+  h+=`<div class="actrow"><button class="b-gray" onclick="closeSheet();checkList(reportList)">重新检查</button><button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("sheet").innerHTML=h;$("sheetMask").classList.add("show");
 }
 async function repairOne(f){
@@ -1262,7 +1322,7 @@ function jumpUnnamed(){
 function unnamedCount(){return items.filter(f=>!names[f.path]).length;}
 function updateHlBtn(){
   const b=$("hlBtn");if(!b)return;
-  b.textContent=hlUnnamed?`🔎 取消标记（还有 ${unnamedCount()} 张未命名）`:"🔎 标出未命名";
+  b.textContent=hlUnnamed?`取消标记（还有 ${unnamedCount()} 张未命名）`:"标出未命名";
 }
 function toggleHl(){
   hlUnnamed=!hlUnnamed;
@@ -1387,14 +1447,14 @@ function buildCropUI(f,im,url){
   const RATIOS=[["自由",0],["1:1",1],["3:4",3/4],["4:3",4/3],["9:16",9/16],["16:9",16/9]];
   const handles=["nw","n","ne","e","se","s","sw","w"].map(t=>`<div class="ch ${t}" data-t="${t}"></div>`).join("");
   const m=document.createElement("div");m.id="cropMask";
-  m.innerHTML=`<h3>✂️ 裁剪这张图（${natW}×${natH}）</h3>
+  m.innerHTML=`<h3>裁剪这张图（${natW}×${natH}）</h3>
   ${ext(f.name)==="gif"?'<div class="cnote">⚠️ 这是 gif，裁剪后会变成静态图</div>':""}
   <div id="cropStage"><div id="cropWrap" style="width:${W}px;height:${H}px">
     <div class="dim" id="dT"></div><div class="dim" id="dB"></div><div class="dim" id="dL"></div><div class="dim" id="dR"></div>
     <div id="cropBox">${handles}</div></div></div>
   <div id="cropInfo"></div>
   <div class="rchips">${RATIOS.map(([l],i)=>`<button data-i="${i}">${l}</button>`).join("")}</div>
-  <div class="cact"><button class="b-main" id="cSave">✂️ 裁剪并替换原图</button><button class="b-gray" id="cCopy">另存为新图</button><button class="b-gray" id="cCancel">取消</button></div>
+  <div class="cact"><button class="b-main" id="cSave">裁剪并替换原图</button><button class="b-gray" id="cCopy">另存为新图</button><button class="b-gray" id="cCancel">取消</button></div>
   <div class="ctip">${f.name===f.name.replace(/\.[^.]+$/,"")+(isJpg?".jpg":".png")?"替换：直接覆盖原图，位置和链接都不变（网站缓存可能要几分钟才更新）。":"替换：新图放在原来的位置，原图会被删除；因为后缀会变成 "+(isJpg?".jpg":".png")+"，链接会变。"}<br>另存为新图：放在原图旁边，原图保留。</div>`;
   document.body.appendChild(m);
   const q=sel=>m.querySelector(sel);
@@ -1609,7 +1669,7 @@ function toggleManage(){managing=!managing;selected=new Set();document.querySele
 function applyManage(){
   $("grid").classList.toggle("managing",managing);
   document.body.classList.toggle("managing-on",managing);
-  $("manageBtn").textContent=managing?"退出批量":"☑️ 批量管理";
+  $("manageBtn").textContent=managing?"退出批量":"批量管理";
   updateM();
 }
 function updateM(){$("mcount").textContent=`已选 ${selected.size}`;}
@@ -1631,15 +1691,59 @@ function syncThemeChoices(){const mode=lsGet('gh_appearance')||(lsGet('gh_dark')
 function toggleDark(){setAppearance(document.body.classList.contains('dark')?'light':'dark');}
 (function initLook(){const t=lsGet('gh_theme')||'original';if(t!=='original')document.body.classList.add('theme-'+t);applyAppearance();})();
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if((lsGet('gh_appearance')||'light')==='auto')applyAppearance()});
-/* Floating quick launcher: tap to fan out; drag to reposition; snaps to and partly hides at screen edges. */
-(function initFloatingNav(){const wrap=$('floatNav'),orb=$('floatOrb'),menu=$('floatActions');let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0;
-function place(x,y,save=true){const maxX=Math.max(0,innerWidth-46),maxY=Math.max(8,innerHeight-60);x=Math.max(-22,Math.min(maxX+22,x));y=Math.max(8,Math.min(maxY,y));wrap.style.left=x+'px';wrap.style.top=y+'px';wrap.style.right='auto';wrap.classList.toggle('edge-left',x<8);wrap.classList.toggle('edge-right',x>innerWidth-30);if(save)lsSet('gh_float_pos',JSON.stringify({x,y}));}
-try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
-orb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=wrap.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;downAt=Date.now();orb.setPointerCapture?.(e.pointerId);});
-orb.addEventListener('pointermove',e=>{if(!orb.hasPointerCapture?.(e.pointerId))return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}});
-orb.addEventListener('pointerup',e=>{wrap.classList.remove('dragging');if(moved){const r=wrap.getBoundingClientRect();let x=r.left;if(x<innerWidth/2)x=-22;else x=innerWidth-24;place(x,r.top,true);return;}if(Date.now()-downAt>650)return;wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');});
-window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.min(r.left,innerWidth-24),Math.min(r.top,innerHeight-60),true)});
-document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
+/* Floating quick launcher: freely positionable, with four shortcut bubbles arranged around the orb. */
+(function initFloatingNav(){
+  const wrap=$('floatNav'),orb=$('floatOrb'),menu=$('floatActions'),buttons=[...menu.querySelectorAll('button')];
+  let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0;
+  function place(x,y,save=true){
+    const maxX=Math.max(-23,innerWidth-23),maxY=Math.max(8,innerHeight-54);
+    x=Math.max(-23,Math.min(maxX,x));y=Math.max(8,Math.min(maxY,y));
+    wrap.style.left=x+'px';wrap.style.top=y+'px';wrap.style.right='auto';
+    wrap.classList.toggle('edge-left',x<0);wrap.classList.toggle('edge-right',x>innerWidth-46);
+    if(save)lsSet('gh_float_pos',JSON.stringify({x,y}));
+    if(wrap.classList.contains('open'))positionActions();
+  }
+  function positionActions(){
+    const r=wrap.getBoundingClientRect(),orbSize=46,btnSize=42,radius=61;
+    const angles=[-90,0,90,180];
+    buttons.forEach((b,i)=>{
+      const a=angles[i]*Math.PI/180;
+      let anglesToUse=angles;
+      const cx0=r.left+orbSize/2,cy0=r.top+orbSize/2;
+      const nearEdge=cx0<84||cx0>innerWidth-84||cy0<84||cy0>innerHeight-84;
+      if(nearEdge){
+        const inward=Math.atan2(innerHeight/2-cy0,innerWidth/2-cx0)*180/Math.PI;
+        anglesToUse=[inward-68,inward-23,inward+23,inward+68];
+      }
+      const angle=anglesToUse[i]*Math.PI/180;
+      const cx=cx0+Math.cos(angle)*radius;
+      const cy=cy0+Math.sin(angle)*radius;
+      const left=Math.max(6,Math.min(innerWidth-btnSize-6,cx-btnSize/2));
+      const top=Math.max(8,Math.min(innerHeight-btnSize-8,cy-btnSize/2));
+      b.style.setProperty('--tx',(left-r.left)+'px');b.style.setProperty('--ty',(top-r.top)+'px');
+    });
+  }
+  try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
+  orb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=wrap.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;downAt=Date.now();orb.setPointerCapture?.(e.pointerId);});
+  orb.addEventListener('pointermove',e=>{
+    if(!orb.hasPointerCapture?.(e.pointerId))return;
+    const dx=e.clientX-sx,dy=e.clientY-sy;
+    if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}
+  });
+  orb.addEventListener('pointerup',e=>{
+    wrap.classList.remove('dragging');
+    if(moved){
+      const r=wrap.getBoundingClientRect();let x=r.left;
+      /* Only tuck half off-screen when the user deliberately drags right to the edge. */
+      if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;
+      place(x,r.top,true);return;
+    }
+    if(Date.now()-downAt>650)return;
+    wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');
+    if(wrap.classList.contains('open'))positionActions();
+  });
+  window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.max(-23,Math.min(innerWidth-23,r.left)),Math.min(r.top,innerHeight-54),true);});
+  document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
 })();
 function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('open');$('floatActions')?.setAttribute('aria-hidden','true');$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
 function clearSearch(){searchActive=false;$('searchInput').value='';$('searchResults').innerHTML='';$('searchDock').classList.remove('show');document.querySelectorAll('.file.search-hit').forEach(c=>c.classList.remove('search-hit'));}
