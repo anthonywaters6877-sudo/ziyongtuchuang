@@ -217,6 +217,24 @@ body.dragging{-webkit-user-select:none;user-select:none}
 .grip i{width:7px;height:2px}
 .grip.hold{background:#ffb6d2}
 .pop{max-height:calc(100vh - 24px);overflow-y:auto}
+
+/* ===== 进阶功能：侧栏、搜索、卡片尺寸、相似检测、暗色主题 ===== */
+:root{--bg:#fff6fb;--surface:#fff;--ink:#5b4a63;--line:#f3dcea}
+body{background:var(--bg);color:var(--ink);transition:background .2s,color .2s}
+body.dark{--bg:#211d29;--surface:#2c2635;--ink:#f3e9f7;--line:#514258;--soft:#382b3c;background:var(--bg);color:var(--ink)}
+.dark .card,.dark .file,.dark #mbar,.dark #sheet,.dark #dlg,.dark .pop{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.dark input,.dark textarea{background:#241f2b;color:var(--ink);border-color:var(--line)}
+.dark #tabs{background:rgba(33,29,41,.94)}.dark .tab{background:var(--surface);color:var(--ink)}
+.dark .thumb{background:#282331;box-shadow:inset 0 0 0 1px #514258}.dark .name,.dark .tip{color:#b9a9c5}
+#sideToggle{position:fixed;left:10px;top:82px;z-index:25;border-radius:14px;padding:10px 12px;box-shadow:0 4px 14px #8e6b9940}
+#sideMask{display:none;position:fixed;inset:0;background:#20162688;z-index:60}#sideMask.show{display:block}
+#sidebar{position:fixed;z-index:61;left:0;top:0;bottom:0;width:min(82vw,320px);background:var(--surface);color:var(--ink);padding:22px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:8px 0 28px #25142b30;transform:translateX(-105%);transition:transform .22s;overflow:auto}
+#sideMask.show #sidebar{transform:translateX(0)}#sidebar h2{margin:8px 4px 18px;font-size:20px}#sidebar button{display:block;width:100%;text-align:left;margin:7px 0;padding:13px 14px;background:#f8edf7;color:var(--ink);border-radius:14px}#sidebar button.active{background:linear-gradient(135deg,var(--p),var(--p2));color:white}#sidebar .sidefoot{font-size:12px;opacity:.65;margin:18px 4px}
+#searchDock{display:none;position:sticky;top:0;z-index:12;padding:9px 10px;background:var(--bg);border-radius:0 0 16px 16px;box-shadow:0 4px 14px #8e6b991a;margin:0 -16px 10px}#searchDock.show{display:block}#searchDock .row{gap:6px}#searchResults{font-size:12px;margin-top:6px;max-height:140px;overflow:auto}#searchResults button{display:block;width:100%;text-align:left;background:var(--surface);color:var(--ink);margin:4px 0;border-radius:10px;padding:8px}
+.file{transition:grid-column .15s,background .15s}.file .resize-handle{position:absolute;z-index:4;width:18px;height:18px;background:#fff;border:2px solid var(--p2);border-radius:5px;box-shadow:0 1px 5px #49304b40;touch-action:none;display:none}.file.resize-enabled .resize-handle{display:block}.resize-handle.nw{left:2px;top:2px;cursor:nwse-resize}.resize-handle.ne{right:2px;top:2px;cursor:nesw-resize}.resize-handle.sw{left:2px;bottom:2px;cursor:nesw-resize}.resize-handle.se{right:2px;bottom:2px;cursor:nwse-resize}.resize-handle::after{content:'↗';font-size:10px;display:block;text-align:center;line-height:14px;color:var(--p2)}.file.resize-red{outline:3px solid #ff5364;background:#ffe4e7!important}
+#dupeView{display:none}#dupeView.show{display:block}#galleryView.hide{display:none}#dupeView .dupe-section{background:var(--surface);border-radius:18px;margin:12px 0;box-shadow:0 4px 14px #8e6b991a;overflow:hidden}#dupeView .dupe-head{width:100%;text-align:left;border-radius:0;background:#f9edf7;color:var(--ink);padding:14px;font-weight:700}#dupeView .dupe-body{display:none;padding:10px;max-height:55vh;overflow:auto}#dupeView .dupe-section.open .dupe-body{display:block}.dupe-group{border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}.dupe-group h4{font-size:13px;margin-bottom:8px}.dupe-files{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dupe-item{min-width:0;border:1px solid var(--line);border-radius:12px;padding:7px}.dupe-item img{width:100%;height:90px;object-fit:contain;background:#f8f1f7;border-radius:8px}.dupe-item .dfname{font-size:11px;white-space:nowrap;overflow-x:auto;margin:5px 0}.dupe-item .dinfo{font-size:11px;opacity:.75;word-break:break-all}.dupe-item .dactions{display:flex;gap:4px;margin-top:6px}.dupe-item .dactions button{flex:1;padding:6px 3px;font-size:11px}.lights{display:flex;gap:4px;margin-top:5px}.light{width:9px;height:9px;border-radius:50%;display:inline-block;opacity:.18}.light.on{opacity:1}.light.size{background:#ff4e59}.light.alias{background:#25b96b}.light.filename{background:#438bff}
+#searchDock input{background:var(--surface);color:var(--ink)}
+
 </style>
 </head>
 <body>
@@ -224,7 +242,12 @@ body.dragging{-webkit-user-select:none;user-select:none}
   <h1>🐰 我的小图床</h1>
   <button class="b-white" onclick="loadAll()">🔄 刷新</button>
 </header>
+<button id="sideToggle" class="b-main" onclick="toggleSidebar()" aria-label="打开侧边栏">☰</button>
+<div id="sideMask" onclick="if(event.target===this)toggleSidebar(false)"><nav id="sidebar"><h2>🐰 小图床菜单</h2><button class="active" id="navGallery" onclick="switchPanel('gallery')">🖼️ 我的图库</button><button id="navDupe" onclick="switchPanel('dupes')">🧩 相似图片检测</button><button id="navSettings" onclick="switchPanel('settings')">⚙️ 设置</button><div id="settingsPanel" style="display:none"><div class="tip">当前版本：2.0.0</div><button onclick="toggleDark()">🌙 切换可爱暗色模式</button></div><div class="sidefoot">你的图片仍保存在自己的 GitHub 仓库</div><button onclick="toggleSidebar(false)">收起侧边栏</button></nav></div>
 <main>
+  <div id="searchDock"><div class="row"><input id="searchInput" type="text" placeholder="🔎 搜索命名或文件名…" oninput="runSearch()"><button class="b-gray" onclick="clearSearch()">×</button></div><div id="searchResults"></div></div>
+  <div id="dupeView"><h2>🧩 相似图片检测</h2><p class="tip">按大小、命名、文件名分组。红灯=大小，绿灯=命名，蓝灯=文件名；重叠项只在优先级更高的分组显示。</p><div class="row" style="margin:12px 0"><button class="b-main" onclick="scanDuplicates('all')">全部检测</button><button class="b-gray" onclick="scanDuplicates('current')">检测当前分类</button></div><div id="dupeResults"></div></div>
+  <div id="galleryView">
   <div class="card">
     <h2>🔑 Token 设置</h2>
     <div class="row">
@@ -261,6 +284,7 @@ body.dragging{-webkit-user-select:none;user-select:none}
   <div id="bar2">
     <span id="count"></span>
     <span>
+      <button class="b-gray b-mini" onclick="startSearchMode()">🔎 搜索图片</button>
       <button class="b-gray b-mini" onclick="reloadAll()">🔄 重新加载图片</button>
       <button class="b-gray b-mini" onclick="checkAll()">🩺 检查全部</button>
       <button class="b-gray b-mini" id="hlBtn" onclick="toggleHl()">🔎 标出未命名</button>
@@ -270,6 +294,7 @@ body.dragging{-webkit-user-select:none;user-select:none}
   </div>
   <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">⏭ 下一张未命名</button></div>
   <div id="grid"></div>
+  </div>
 </main>
 
 <div id="mbar">
@@ -554,7 +579,7 @@ function renderGrid(){
     gripAttach(grip,card,f);th.appendChild(grip);
     const rl=document.createElement("button");rl.className="rl";rl.textContent="🔄";rl.title="重新加载";
     rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
-    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);
+    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制 ✅");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制 ✅"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
     const acts=document.createElement("div");acts.className="acts";
     const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制 ✅（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
     const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>openImg(f,url);
@@ -570,6 +595,7 @@ function renderGrid(){
     cb.onclick=e=>{e.stopPropagation();al.classList.toggle("open");cb.classList.toggle("up");};
     head.append(al,cb);arrows.push(al);
     card.append(chk,th,head,nm);
+    ["nw","ne","sw","se"].forEach(pos=>{const h=document.createElement("div");h.className="resize-handle "+pos;h.title="拖动调整卡片大小（最多两格）";h.addEventListener("pointerdown",e=>beginResize(e,card,f,pos));card.appendChild(h);});
     const pr=probeRes[f.path];
     if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent="⚠️ "+pr.msg;card.append(w);}
     const more=document.createElement("button");more.className="b-gray more";more.textContent="⋯";more.title="更多";
@@ -583,7 +609,7 @@ function renderGrid(){
     };
     grid.appendChild(card);
   });
-  applyManage();
+  applyManage();restoreCardSizes();
   requestAnimationFrame(()=>arrows.forEach(a=>refreshArrow(a)));
   updateHlBtn();
 }
@@ -1244,6 +1270,8 @@ function openMore(f,entry,al,btn){
     const b=document.createElement("button");b.textContent=label;
     b.onclick=e=>{e.stopPropagation();closePop();fn();};pop.appendChild(b);
   };
+  add("☑️ 批量选择",()=>{if(!managing){managing=true;applyManage();}selected.add(f.path);const c=document.querySelector(`.file[data-path="${CSS.escape(f.path)}"]`);if(c)c.classList.add("sel");updateM();toast("已加入批量选择");});
+  add("↔️ 调整卡片大小 / 完成",()=>{const on=[...document.querySelectorAll(".file")].some(c=>c.classList.contains("resize-enabled"));document.querySelectorAll(".file").forEach(c=>c.classList.toggle("resize-enabled",!on));toast(on?"已结束尺寸调整":"拖动卡片四角调整，最多两格；再点⋯可结束调整");});
   add("✏️ 改名字",()=>renameImg(f,al));
   add("⏭ 下一张未命名",()=>jumpNextFrom(f.path));
   if(!entry.audio)add("✂️ 裁剪",()=>openCrop(f));
@@ -1518,6 +1546,25 @@ function selAll(){
   document.querySelectorAll(".file").forEach((c,i)=>c.classList.toggle("sel",!!items[i]&&selected.has(items[i].path)));
   updateM();
 }
+
+
+/* ===== 新增交互 ===== */
+let panelNow='gallery',searchActive=false,resizeState=null,dupeIgnored=new Set(JSON.parse(lsGet('gh_dupe_ignored')||'[]'));
+function toggleSidebar(force){const m=$('sideMask');if(force===false)m.classList.remove('show');else m.classList.toggle('show');}
+function switchPanel(p){panelNow=p;$('galleryView').classList.toggle('hide',p!=='gallery');$('dupeView').classList.toggle('show',p==='dupes');$('settingsPanel').style.display=p==='settings'?'block':'none';$('navGallery').classList.toggle('active',p==='gallery');$('navDupe').classList.toggle('active',p==='dupes');$('navSettings').classList.toggle('active',p==='settings');toggleSidebar(false);if(p==='dupes'&&!$('dupeResults').innerHTML.trim())scanDuplicates('all');}
+function toggleDark(){document.body.classList.toggle('dark');lsSet('gh_dark',document.body.classList.contains('dark')?'1':'0');toast(document.body.classList.contains('dark')?'已切换可爱暗色模式 🌙':'已切回浅色模式 🌸');}
+if(lsGet('gh_dark')==='1')document.body.classList.add('dark');
+function startSearchMode(){searchActive=true;$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
+function clearSearch(){searchActive=false;$('searchInput').value='';$('searchResults').innerHTML='';$('searchDock').classList.remove('show');document.querySelectorAll('.file.search-hit').forEach(c=>c.classList.remove('search-hit'));}
+let searchIndex=null,searchLoading=false;async function runSearch(){const q=$('searchInput').value.trim().toLowerCase(),out=$('searchResults');out.innerHTML='';if(!q){out.textContent='输入命名或文件名进行搜索';return;}if(!searchIndex&&!searchLoading){searchLoading=true;out.textContent='正在搜索整个仓库…';try{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());searchIndex=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}catch(e){searchIndex=items.slice();toast('全仓库搜索失败，暂时搜索当前分类');}finally{searchLoading=false;}}if(searchLoading)return;const source=searchIndex||items;const all=source.filter(f=>(names[f.path]||'').toLowerCase().includes(q)||disp(f.name).toLowerCase().includes(q)||f.name.toLowerCase().includes(q));if(!all.length){out.textContent='没有找到匹配的文件';return;}all.slice(0,100).forEach(f=>{const b=document.createElement('button');b.textContent=(names[f.path]||disp(f.name))+' · '+catName(dirOfPath(f.path));b.onclick=()=>{if(dirOfPath(f.path)!==curDir){curDir=dirOfPath(f.path);loadAll().then(()=>jumpToPath(f.path));}else jumpToPath(f.path);};out.appendChild(b);});}
+function jumpToPath(path){const c=[...document.querySelectorAll('.file')].find(x=>x.dataset.path===path);if(!c){toast('当前分类中暂时找不到这张图');return;}c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1500);}
+function beginResize(e,card,f,pos){e.preventDefault();e.stopPropagation();resizeState={card,f,pos,x:e.clientX,y:e.clientY,w:card.getBoundingClientRect().width,h:card.querySelector('.thumb').getBoundingClientRect().height,red:false};card.classList.add('resize-enabled');const move=ev=>{if(!resizeState)return;const dx=ev.clientX-resizeState.x,dy=ev.clientY-resizeState.y;const wantWide=resizeState.w+(pos.includes('e')?dx:-dx),wantTall=resizeState.h+(pos.includes('s')?dy:-dy);const narrow=wantWide<resizeState.w*.72,over=wantWide>resizeState.w*1.8||wantTall>resizeState.h*1.85;resizeState.red=narrow||over;card.classList.toggle('resize-red',resizeState.red);if(!resizeState.red){const span=wantWide>resizeState.w*1.42?2:1;card.style.gridColumn='span '+span;card.querySelector('.thumb').style.height=Math.max(90,Math.min(resizeState.h*2,wantTall))+'px';card.dataset.customSpan=span;card.dataset.customHeight=card.querySelector('.thumb').style.height;}};const end=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',end);document.removeEventListener('pointercancel',end);if(!resizeState)return;const st=resizeState;st.card.classList.remove('resize-red');if(st.red){st.card.style.gridColumn='';st.card.querySelector('.thumb').style.height='120px';delete st.card.dataset.customSpan;delete st.card.dataset.customHeight;toast('已回到原尺寸');}else{lsSet('gh_card_sizes',JSON.stringify({...JSON.parse(lsGet('gh_card_sizes')||'{}'),[st.f.path]:{span:st.card.dataset.customSpan||1,height:st.card.dataset.customHeight||'120px'}}));toast('卡片尺寸已保存');}resizeState=null;};document.addEventListener('pointermove',move);document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);}
+function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{const v=m[c.dataset.path];if(v){c.style.gridColumn='span '+Math.min(2,Math.max(1,+v.span||1));const th=c.querySelector('.thumb');if(th)th.style.height=v.height||'120px';}})}
+async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','🔴 大小一样'],['alias','🟢 命名一样'],['filename','🔵 文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+async function dupeRename(path){const f={path,name:path.split('/').pop()};const v=await askText('修改图片命名（留空清除）',names[path]||'','输入新的命名');if(v===null)return;if(v.trim())names[path]=v.trim();else delete names[path];saveNamesLocal();toast('命名已更新');scanDuplicates('all');}
+function ignoreDupe(path){dupeIgnored.add(path);lsSet('gh_dupe_ignored',JSON.stringify([...dupeIgnored]));toast('已移出相似检测列表');scanDuplicates('all');}
+async function dupeDelete(path){const f=items.find(x=>x.path===path)||{path,name:path.split('/').pop(),sha:''};if(!f.sha){try{const j=await gh('GET',API+encPath(path)+'?ref='+GH_BRANCH);f.sha=j.sha;}catch(e){toast('读取文件信息失败：'+e.message);return;}}if(!confirm('确定删除 '+f.name+' 吗？'))return;try{await delFile(f.path,f.sha);dropNames([f.path]);toast('已删除');scanDuplicates('all');if(dirOfPath(path)===curDir)loadAll();}catch(e){toast('删除失败：'+e.message);}}
 
 $("token").value=getToken();
 loadAll();
