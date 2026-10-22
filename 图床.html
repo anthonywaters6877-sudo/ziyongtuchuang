@@ -53,8 +53,8 @@ input:focus{border-color:var(--p2)}
 .tab.add{background:#f1ebf5}
 #bar2{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;gap:6px;flex-wrap:wrap}
 /* 图库 */
-#grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(min-width:600px){#grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+#grid{display:flex;flex-wrap:wrap;align-items:stretch;gap:12px}
+@media(min-width:600px){#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}}
 .file{background:#fff;border-radius:18px;box-shadow:0 5px 14px rgba(255,143,184,.2);padding:8px;position:relative;border:3px solid transparent}
 .file.sel{border-color:var(--p)}
 .thumb{height:120px;background:#fdf3f8;border-radius:13px;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -129,10 +129,11 @@ input:focus{border-color:var(--p2)}
 .file{padding:9px}
 #tabs{position:sticky;top:0;z-index:4;background:rgba(255,246,251,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);margin:0 -16px 6px;padding:8px 16px}
 /* 修复：超长文件名把页面撑宽 */
-#grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-@media(min-width:600px){#grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
-.file{min-width:0}
+#grid{display:flex;flex-wrap:wrap;align-items:stretch;gap:12px}
+@media(min-width:600px){#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}}
+.file{min-width:0;flex:1 1 calc(50% - 6px);max-width:calc(50% - 6px);box-sizing:border-box}
 .file>*{min-width:0;max-width:100%}
+@media(min-width:600px){#grid .file{flex:initial;max-width:none}}
 /* 统一卡片大小 */
 .file{display:flex;flex-direction:column}
 .thumb{flex:none}
@@ -145,7 +146,7 @@ input:focus{border-color:var(--p2)}
 /* ⋯ 按钮放右上角，带边框，略微上移 */
 .file{padding-top:14px}
 .chk{top:20px;left:14px}
-.file>.more{position:absolute;top:-6px;right:31px;width:26px;height:26px;padding:0;border-radius:50%;background:#fff;border:1.5px solid #f3c6dc;box-shadow:0 2px 6px rgba(183,156,255,.45);color:var(--p2);font-size:15px;line-height:20px;z-index:2}
+.file>.more{position:absolute;top:-6px;right:6px;width:26px;height:26px;padding:0;border-radius:50%;background:#fff;border:1.5px solid #f3c6dc;box-shadow:0 2px 6px rgba(183,156,255,.45);color:var(--p2);font-size:15px;line-height:20px;z-index:2}
 .managing .more{display:none}
 /* 名字展开小箭头 */
 .head{display:flex;align-items:flex-start;gap:4px}
@@ -203,19 +204,16 @@ input:focus{border-color:var(--p2)}
 .bbox{background:rgba(91,74,99,.62);color:#fff;padding:14px 22px;border-radius:18px;display:flex;gap:10px;align-items:center;font-size:14px}
 .spin{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spinr .8s linear infinite}
 @keyframes spinr{to{transform:rotate(360deg)}}
-/* 左侧三条杠：长按拖动排序 */
-.grip{position:absolute;left:3px;top:10px;bottom:10px;width:22px;border-radius:11px;background:rgba(255,255,255,.7);box-shadow:0 1px 4px rgba(183,156,255,.5);display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;z-index:3;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-.grip i{display:block;width:11px;height:2.5px;border-radius:2px;background:var(--p2)}
-.grip.hold{background:rgba(255,143,184,.85)}
+/* 精致排序轨道：放在缩略图左侧预留的窄槽内，长按可拖动排序 */
+.grip{position:absolute;left:0;top:0;bottom:0;width:16px;border-radius:10px 0 0 10px;background:linear-gradient(180deg,rgba(222,198,246,.72),rgba(250,220,237,.88));border-right:1px solid rgba(194,151,214,.28);box-shadow:inset -1px 0 rgba(255,255,255,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;z-index:3;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.grip i{display:block;width:7px;height:2px;border-radius:3px;background:linear-gradient(90deg,#bd8edb,#e99ac5);box-shadow:0 0 0 1px rgba(255,255,255,.28)}
+.grip.hold{background:linear-gradient(180deg,rgba(228,163,215,.95),rgba(190,164,242,.95));box-shadow:inset 0 0 0 1px rgba(255,255,255,.6),0 2px 8px rgba(184,126,198,.25)}
 .file.ghost{opacity:.3}
 .dragfloat{position:fixed !important;z-index:50;pointer-events:none;opacity:.93;box-shadow:0 14px 32px rgba(91,74,99,.45);margin:0}
 .dragbadge{position:absolute;right:10px;top:-8px;background:var(--p);color:#fff;border-radius:999px;padding:3px 10px;font-size:12px;z-index:60;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 body.dragging{-webkit-user-select:none;user-select:none}
-/* 三条杠：更细，贴着图框左边，不压图 */
+/* 缩略图左侧为排序轨道预留独立空间，避免遮挡图片 */
 .thumb{padding-left:16px;box-sizing:border-box}
-.grip{left:0;top:0;bottom:0;width:14px;border-radius:0;background:#f4eaf9;box-shadow:none;border-right:1px solid #eadcf2}
-.grip i{width:7px;height:2px}
-.grip.hold{background:#ffb6d2}
 .pop{max-height:calc(100vh - 24px);overflow-y:auto}
 
 /* ===== 进阶功能：侧栏、搜索、卡片尺寸、相似检测、暗色主题 ===== */
@@ -231,7 +229,7 @@ body.dark{--bg:#211d29;--surface:#2c2635;--ink:#f3e9f7;--line:#514258;--soft:#38
 #sidebar{position:fixed;z-index:61;left:0;top:0;bottom:0;width:min(82vw,320px);background:var(--surface);color:var(--ink);padding:22px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:8px 0 28px #25142b30;transform:translateX(-105%);transition:transform .22s;overflow:auto}
 #sideMask.show #sidebar{transform:translateX(0)}#sidebar h2{margin:8px 4px 18px;font-size:20px}#sidebar button{display:block;width:100%;text-align:left;margin:7px 0;padding:13px 14px;background:#f8edf7;color:var(--ink);border-radius:14px}#sidebar button.active{background:linear-gradient(135deg,var(--p),var(--p2));color:white}#sidebar .sidefoot{font-size:12px;opacity:.65;margin:18px 4px}
 #searchDock{display:none;position:sticky;top:0;z-index:12;padding:9px 10px;background:var(--bg);border-radius:0 0 16px 16px;box-shadow:0 4px 14px #8e6b991a;margin:0 -16px 10px}#searchDock.show{display:block}#searchDock .row{gap:6px}#searchResults{font-size:12px;margin-top:6px;max-height:140px;overflow:auto}#searchResults button{display:block;width:100%;text-align:left;background:var(--surface);color:var(--ink);margin:4px 0;border-radius:10px;padding:8px}
-.file{transition:grid-column .15s,background .15s}.file .resize-handle{position:absolute;z-index:4;width:18px;height:18px;background:#fff;border:2px solid var(--p2);border-radius:5px;box-shadow:0 1px 5px #49304b40;touch-action:none;display:none}.file.resize-enabled .resize-handle{display:block}.resize-handle.nw{left:2px;top:2px;cursor:nwse-resize}.resize-handle.ne{right:2px;top:2px;cursor:nesw-resize}.resize-handle.sw{left:2px;bottom:2px;cursor:nesw-resize}.resize-handle.se{right:2px;bottom:2px;cursor:nwse-resize}.resize-handle::after{content:'↗';font-size:10px;display:block;text-align:center;line-height:14px;color:var(--p2)}.file.resize-red{outline:3px solid #ff5364;background:#ffe4e7!important}
+.file{transition:flex-basis .12s ease,background .15s}.file .resize-handle{position:absolute;z-index:5;width:13px;height:13px;background:transparent;border:0;border-radius:3px;box-shadow:none;touch-action:none;display:block;opacity:.68;transition:opacity .15s,transform .15s}.file .resize-handle:active{opacity:1;transform:scale(1.08)}.resize-handle.nw{left:5px;top:5px;cursor:nwse-resize;border-top:2px solid #c79bdf;border-left:2px solid #c79bdf}.resize-handle.ne{right:5px;top:5px;cursor:nesw-resize;border-top:2px solid #c79bdf;border-right:2px solid #c79bdf}.resize-handle.sw{left:5px;bottom:5px;cursor:nesw-resize;border-bottom:2px solid #c79bdf;border-left:2px solid #c79bdf}.resize-handle.se{right:5px;bottom:5px;cursor:nwse-resize;border-bottom:2px solid #c79bdf;border-right:2px solid #c79bdf}.resize-handle::after{content:none}.file.resize-red{outline:2px solid #ff5364;background:#ffe4e7!important}
 #dupeView{display:none}#dupeView.show{display:block}#galleryView.hide{display:none}#dupeView .dupe-section{background:var(--surface);border-radius:18px;margin:12px 0;box-shadow:0 4px 14px #8e6b991a;overflow:hidden}#dupeView .dupe-head{width:100%;text-align:left;border-radius:0;background:#f9edf7;color:var(--ink);padding:14px;font-weight:700}#dupeView .dupe-body{display:none;padding:10px;max-height:55vh;overflow:auto}#dupeView .dupe-section.open .dupe-body{display:block}.dupe-group{border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}.dupe-group h4{font-size:13px;margin-bottom:8px}.dupe-files{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dupe-item{min-width:0;border:1px solid var(--line);border-radius:12px;padding:7px}.dupe-item img{width:100%;height:90px;object-fit:contain;background:#f8f1f7;border-radius:8px}.dupe-item .dfname{font-size:11px;white-space:nowrap;overflow-x:auto;margin:5px 0}.dupe-item .dinfo{font-size:11px;opacity:.75;word-break:break-all}.dupe-item .dactions{display:flex;gap:4px;margin-top:6px}.dupe-item .dactions button{flex:1;padding:6px 3px;font-size:11px}.lights{display:flex;gap:4px;margin-top:5px}.light{width:9px;height:9px;border-radius:50%;display:inline-block;opacity:.18}.light.on{opacity:1}.light.size{background:#ff4e59}.light.alias{background:#25b96b}.light.filename{background:#438bff}
 #searchDock input{background:var(--surface);color:var(--ink)}
 
@@ -288,7 +286,7 @@ body.dark .theme-choice.active,body.dark .theme-tile.active{border-color:var(--p
 @media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb{transition:none}}
 
 
-/* 2.3.0 · refined resize grips and movable shortcuts, minimal line icon system, free-floating radial launcher */
+/* 2.2.0 · glassmorphism polish, minimal line icon system, free-floating radial launcher */
 .stat-heading{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px!important;line-height:1.55;margin-bottom:12px}
 .stat-heading .stat-symbol{width:30px;height:30px;display:inline-grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--p) 12%,var(--surface));color:var(--p)}
 .stat-heading .ui-icon{width:18px;height:18px}
@@ -347,41 +345,6 @@ body.dark .head-menu{background:#ffffff20;border-color:#ffffff48}
 @media(max-width:420px){header{padding:16px 15px 20px}header h1{font-size:19px}.card{padding:16px;border-radius:22px}#floatNav{z-index:70}}
 @media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb,#drop{transition:none!important}}
 
-
-/* 2.3.0 · tactile resize corners, polished reorder rail, movable radial shortcuts */
-.file{position:relative;overflow:visible;transition:grid-column .18s,box-shadow .18s,background .18s}
-.file .resize-handle{display:block!important;position:absolute;z-index:8;width:25px;height:25px;background:color-mix(in srgb,var(--surface) 76%,transparent);border:0;border-radius:8px;box-shadow:0 3px 12px color-mix(in srgb,var(--p) 20%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;opacity:.86;transition:opacity .15s,transform .15s}
-.file .resize-handle:active{opacity:1;transform:scale(1.08)}
-.resize-handle::before,.resize-handle::after{content:"";position:absolute;display:block;background:linear-gradient(135deg,var(--p),var(--p2));border-radius:5px}
-.resize-handle.nw{left:-3px;top:-3px}.resize-handle.ne{right:-3px;top:-3px}.resize-handle.sw{left:-3px;bottom:-3px}.resize-handle.se{right:-3px;bottom:-3px}
-.resize-handle.nw::before,.resize-handle.ne::before,.resize-handle.sw::before,.resize-handle.se::before{width:12px;height:3px;top:6px}
-.resize-handle.nw::after,.resize-handle.ne::after,.resize-handle.sw::after,.resize-handle.se::after{width:3px;height:12px;top:6px}
-.resize-handle.nw::before,.resize-handle.sw::before{left:6px}.resize-handle.ne::before,.resize-handle.se::before{right:6px}
-.resize-handle.nw::after,.resize-handle.ne::after{top:6px}.resize-handle.sw::after,.resize-handle.se::after{bottom:6px;top:auto}
-.resize-handle.nw::after,.resize-handle.sw::after{left:6px}.resize-handle.ne::after,.resize-handle.se::after{right:6px}
-.file.resize-red{outline:3px solid #ff5364;background:#ffe4e7!important;box-shadow:0 0 0 5px #ff536426}
-/* Replace the dated three-bar reorder rail with a slim glass grip and three dots */
-.grip{left:0;top:8px;bottom:8px;width:15px;border-radius:9px;background:color-mix(in srgb,var(--surface) 78%,transparent);border:1px solid color-mix(in srgb,var(--p) 22%,var(--line));box-shadow:inset 0 1px 0 #ffffff65,0 2px 8px #33204412;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;z-index:3;cursor:grab;touch-action:none}
-.grip i{width:3.5px;height:3.5px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:0 0 0 1px color-mix(in srgb,var(--p) 10%,transparent)}
-.grip.hold{background:color-mix(in srgb,var(--p) 28%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--p) 12%,transparent)}
-.thumb{padding-left:17px}
-.alias{display:flex;align-items:flex-start;gap:6px}
-.alias-mark{width:13px;height:13px;flex:none;margin-top:3px;border:1.6px solid currentColor;border-radius:4px;transform:rotate(-8deg);opacity:.75;position:relative}
-.alias-mark:after{content:"";position:absolute;width:4px;height:4px;border:1.3px solid currentColor;border-radius:50%;top:1px;left:1px}
-.alias-text{min-width:0;overflow-wrap:anywhere}
-.rl{display:grid!important;place-items:center;border:1px solid var(--line)!important;background:color-mix(in srgb,var(--surface) 80%,transparent)!important;color:var(--p)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.rl .ui-icon{width:15px;height:15px}
-.restore-btn{display:inline-flex!important;align-items:center;gap:5px}
-.restore-btn .ui-icon{width:14px;height:14px}
-/* Each shortcut can be repositioned independently when the radial menu is open */
-.float-actions button{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;z-index:2}
-.float-actions button.is-moving{transition:none!important;opacity:1;box-shadow:0 0 0 4px color-mix(in srgb,var(--p) 18%,transparent),0 10px 25px #120d2030}
-#floatNav.open .float-actions button{will-change:transform}
-body.dark .file .resize-handle{background:color-mix(in srgb,var(--surface) 88%,transparent);box-shadow:0 3px 12px #0005}
-body.dark .grip{background:color-mix(in srgb,var(--surface) 82%,transparent);border-color:var(--line)}
-body.dark .alias-mark{color:var(--p)}
-@media(max-width:420px){.file .resize-handle{width:24px;height:24px}.grip{width:14px}}
-
 </style>
 </head>
 <body>
@@ -411,7 +374,7 @@ body.dark .alias-mark{color:var(--p)}
       <button class="theme-tile" data-theme="sunshine" onclick="setTheme('sunshine')"><span class="theme-swatch sw-sunshine"><i></i><i></i><i></i></span><b>晴日奶油</b><small>明亮、温暖的阳光感</small></button>
       <button class="theme-tile" data-theme="ocean" onclick="setTheme('ocean')"><span class="theme-swatch sw-ocean"><i></i><i></i><i></i></span><b>雾蓝海盐</b><small>安静、简约的蓝灰色</small></button>
     </div></div>
-    <div class="card settings-card version-card"><span>当前版本</span><strong>2.3.0</strong><span class="tip">图床 · 个性化界面</span></div>
+    <div class="card settings-card version-card"><span>当前版本</span><strong>2.2.0</strong><span class="tip">图床 · 个性化界面</span></div>
   </div>
   <div id="dupeView"><h2 class="section-heading"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="10" height="12" rx="2"/><rect x="10.5" y="8" width="10" height="12" rx="2"/><path d="m6 13 2-2 2 2"/></svg>相似图片检测</h2><p class="tip">按大小、命名、文件名分组。红灯=大小，绿灯=命名，蓝灯=文件名；重叠项只在优先级更高的分组显示。</p><div class="row" style="margin:12px 0"><button class="b-main" onclick="scanDuplicates('all')">全部检测</button><button class="b-gray" onclick="scanDuplicates('current')">检测当前分类</button></div><div id="dupeResults"></div></div>
   <div id="galleryView">
@@ -459,7 +422,7 @@ body.dark .alias-mark{color:var(--p)}
       <button class="b-red b-mini" id="delCatBtn" onclick="delCat()" style="display:none">删除分类</button>
     </span>
   </div>
-  <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">下一张未命名</button></div>
+  <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">⏭ 下一张未命名</button></div>
   <div id="grid"></div>
   </div>
 </main>
@@ -517,7 +480,7 @@ function getToken(){return lsGet("gh_token")||"";}
 function saveToken(){
   const v=$("token").value.trim();
   if(!v){toast("请先粘贴 Token");return;}
-  lsSet("gh_token",v);toast("Token 已保存");loadAll();
+  lsSet("gh_token",v);toast("Token 已保存 ✅");loadAll();
 }
 function headers(){return {"Authorization":"token "+getToken(),"Accept":"application/vnd.github+json","Content-Type":"application/json"};}
 async function gh(method,url,body){
@@ -560,7 +523,7 @@ function makeTaskEl(t){
 function setTask(t,s,err){
   t.status=s;t.err=err||"";
   const st=t.el.querySelector(".qst"),rb=t.el.querySelector(".qretry");
-  st.textContent={wait:"排队中",up:"上传中",ok:"成功",fail:"失败："+t.err}[s];
+  st.textContent={wait:"⏳ 排队中",up:"⬆️ 上传中",ok:"✅ 成功",fail:"❌ "+t.err}[s];
   st.className="qst "+s;
   rb.style.display=s==="fail"?"inline-block":"none";
   t.el.classList.toggle("hide",filterFail&&s!=="fail");
@@ -569,7 +532,7 @@ function setTask(t,s,err){
 function updateQ(){
   const c={wait:0,up:0,ok:0,fail:0};tasks.forEach(t=>c[t.status]++);
   const total=tasks.length;
-  $("qsum").textContent=`共 ${total} 个　成功 ${c.ok}　失败 ${c.fail}　等待 ${c.wait+c.up}`;
+  $("qsum").textContent=`共 ${total} 张　✅ ${c.ok}　❌ ${c.fail}　⏳ ${c.wait+c.up}`;
   $("qall").firstElementChild.style.width=(total?(c.ok+c.fail)/total*100:0)+"%";
   $("qarrow").textContent=$("qbox").classList.contains("open")?"▲ 收起":"▼ 展开";
   if(!total)$("qbox").style.display="none";
@@ -583,7 +546,7 @@ function toggleFilter(){
 }
 function retryAll(){
   const f=tasks.filter(t=>t.status==="fail");
-  if(!f.length){toast("没有失败的文件");return;}
+  if(!f.length){toast("没有失败的 🎉");return;}
   f.forEach(t=>setTask(t,"wait"));pump();
 }
 function clearOk(){
@@ -600,7 +563,7 @@ async function pump(){
   running=false;
   if(did){
     const f=tasks.filter(t=>t.status==="fail").length;
-    toast(f?`上传完成，有 ${f} 张失败，可点重新上传`:"全部上传成功");
+    toast(f?`上传完成，有 ${f} 张失败，可点重新上传`:"全部上传成功 🎉");
     loadAll();
   }
 }
@@ -635,7 +598,7 @@ async function doUpload(t){
     let src=t.file;
     const head=new Uint8Array(await src.slice(0,16).arrayBuffer());
     if(sniff(head)==="HEIC"){
-      t.el.querySelector(".qst").textContent="转换 HEIC…";
+      t.el.querySelector(".qst").textContent="🔄 转换 HEIC…";
       src=await heicToPng(src);
       t.name=t.name.replace(/\.[^.]+$/,"")+".png";
     }
@@ -669,7 +632,7 @@ async function loadAll(){
   if(!getToken()){grid.innerHTML='<div class="empty">先在上面保存 Token，图库才会显示～</div>';$("tabs").innerHTML="";$("count").textContent="";return;}
   const silent=(renderedDir===curDir&&!!grid.querySelector(".file"));
   const keepY=window.scrollY;
-  if(silent)showBusy("刷新中…");else grid.innerHTML='<div class="empty">加载中…</div>';
+  if(silent)showBusy("刷新中…");else grid.innerHTML='<div class="empty">加载中…🌸</div>';
   try{
     const root=await ghList("");
     const base=await ghList(BASE);
@@ -677,10 +640,10 @@ async function loadAll(){
     const cats=[...new Set([...baseDirs,...localCats()])];
     const legacyFiles=root.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)));
     const legacyDirs=root.filter(f=>f.type==="dir"&&!f.name.startsWith(".")&&f.name!==BASE).map(f=>f.name);
-    tabs=[{label:"未分类",dir:BASE}];
-    cats.forEach(c=>tabs.push({label:c,dir:BASE+"/"+c}));
-    if(legacyFiles.length)tabs.push({label:"旧文件（仓库根目录）",dir:""});
-    legacyDirs.forEach(d=>tabs.push({label:"旧："+d,dir:d}));
+    tabs=[{label:"🌷 未分类",dir:BASE}];
+    cats.forEach(c=>tabs.push({label:"📁 "+c,dir:BASE+"/"+c}));
+    if(legacyFiles.length)tabs.push({label:"📦 旧文件（仓库根目录）",dir:""});
+    legacyDirs.forEach(d=>tabs.push({label:"📦 旧："+d,dir:d}));
     if(!tabs.some(t=>t.dir===curDir))curDir=BASE;
     const list=curDir===""?root:curDir===BASE?base:await ghList(curDir);
     items=list.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)))
@@ -726,7 +689,7 @@ async function addCat(){
 function renderGrid(){
   const grid=$("grid");grid.innerHTML="";thumbs=[];arrows=[];
   $("count").textContent=`共 ${items.length} 个文件 · ${fmtSize(items.reduce((a,f)=>a+f.size,0))}`;
-  if(!items.length){grid.innerHTML='<div class="empty">这里还是空的，上传一些文件吧。</div>';applyManage();return;}
+  if(!items.length){grid.innerHTML='<div class="empty">这里还是空的，上传点东西吧～🍃</div>';applyManage();return;}
   items.forEach(f=>{
     const url=siteUrl(f.path);
     const card=document.createElement("div");card.className="file"+(selected.has(f.path)?" sel":"")+(hlUnnamed&&!names[f.path]?" unnamed":"");
@@ -737,24 +700,24 @@ function renderGrid(){
     if(AUD.includes(ext(f.name))){const a=document.createElement("audio");a.controls=true;a.src=url;a.preload="none";th.appendChild(a);entry.el=a;entry.audio=true;}
     else{
       const im=document.createElement("img");im.loading="lazy";th.appendChild(im);
-      const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="加载失败<br>点击重试";
+      const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="😢 加载失败<br>点这里重试";
       fb.onclick=e=>{e.stopPropagation();loadImg(f,im,true,true);};th.appendChild(fb);
       entry.el=im;loadImg(f,im,false);
     }
     thumbs.push(entry);
     const grip=document.createElement("div");grip.className="grip";grip.title="长按拖动排序";grip.innerHTML="<i></i><i></i><i></i>";
     gripAttach(grip,card,f);th.appendChild(grip);
-    const rl=document.createElement("button");rl.className="rl";rl.innerHTML="<svg class='ui-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M20 7v5h-5M4 17v-5h5'/><path d='M6.2 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 11.8-3'/></svg>";rl.title="重新加载";
+    const rl=document.createElement("button");rl.className="rl";rl.textContent="🔄";rl.title="重新加载";
     rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
-    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
+    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制 ✅");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制 ✅"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
     const acts=document.createElement("div");acts.className="acts";
-    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
+    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制 ✅（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
     const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>openImg(f,url);
     const b3=document.createElement("button");b3.className="b-red";b3.textContent="删除";b3.onclick=()=>delOne(f);
     acts.append(b1,b2,b3);
     const al=document.createElement("div");
     al.className="alias"+(names[f.path]?"":" none");
-    al.innerHTML="<span class='alias-mark' aria-hidden='true'></span><span class='alias-text'></span>";al.querySelector(".alias-text").textContent=names[f.path]||"点我命名";
+    al.textContent=names[f.path]?"🏷️ "+names[f.path]:"🏷️ 点我命名";
     al.onclick=()=>{if(managing)return;renameImg(f,al);};
     const head=document.createElement("div");head.className="head";
     const tools=document.createElement("div");tools.className="tools";
@@ -762,9 +725,9 @@ function renderGrid(){
     cb.onclick=e=>{e.stopPropagation();al.classList.toggle("open");cb.classList.toggle("up");};
     head.append(al,cb);arrows.push(al);
     card.append(chk,th,head,nm);
-    ["nw","ne","sw","se"].forEach(pos=>{const h=document.createElement("div");h.className="resize-handle "+pos;h.title="拖动调整卡片大小（最多两格）";h.addEventListener("pointerdown",e=>{h.setPointerCapture?.(e.pointerId);beginResize(e,card,f,pos)});card.appendChild(h);});
+    ["nw","ne","sw","se"].forEach(pos=>{const h=document.createElement("div");h.className="resize-handle "+pos;h.title="拖动调整卡片大小（最多两格）";h.addEventListener("pointerdown",e=>beginResize(e,card,f,pos));card.appendChild(h);});
     const pr=probeRes[f.path];
-    if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent="提示："+pr.msg;card.append(w);}
+    if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent="⚠️ "+pr.msg;card.append(w);}
     const more=document.createElement("button");more.className="b-gray more";more.textContent="⋯";more.title="更多";
     more.onclick=e=>{e.stopPropagation();openMore(f,entry,al,more);};
     card.append(acts);
@@ -781,7 +744,7 @@ function renderGrid(){
   updateHlBtn();
 }
 async function copy(text,msg){
-  msg=msg||"链接已复制";
+  msg=msg||"链接已复制 ✅";
   try{await navigator.clipboard.writeText(text);toast(msg);}
   catch(e){
     const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
@@ -892,7 +855,7 @@ function finishDrag(){
   const byPath=new Map(items.map(f=>[f.path,f]));
   items=order.map(p=>byPath.get(p)).filter(Boolean);
   saveOrder(curDir,order);
-  toast("顺序已保存");
+  toast("顺序已保存 ✅");
 }
 
 /* ================= 图片名字 ================= */
@@ -918,13 +881,13 @@ function askText(title,initial,hint){
   });
 }
 async function renameImg(f,el){
-  const v=await askText("给这张图起个名字（留空保存 = 清除名字）",names[f.path]||"","例如：开心、吃番茄");
+  const v=await askText("给这张图起个名字（留空保存 = 清除名字）",names[f.path]||"","比如：开心、吃番茄");
   if(v===null)return;
   const n=v.trim();
   if(n)names[f.path]=n;else delete names[f.path];
   saveNamesLocal();
   el.className="alias"+(n?"":" none");
-  el.innerHTML="<span class='alias-mark' aria-hidden='true'></span><span class='alias-text'></span>";el.querySelector(".alias-text").textContent=n||"点我命名";refreshArrow(el);
+  el.textContent=n?"🏷️ "+n:"🏷️ 点我命名";refreshArrow(el);
   const cardEl=el.closest(".file");if(cardEl)cardEl.classList.toggle("unnamed",hlUnnamed&&!n);
   updateHlBtn();
 }
@@ -941,7 +904,7 @@ async function backupNames(){
     const r=await fetch(API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:headers(),cache:"no-store"});
     if(r.ok)sha=(await r.json()).sha;
     await gh("PUT",API+encPath(NAMES_PATH),{message:"backup names",content:b64enc(JSON.stringify({v:2,names,order:orderMap()},null,1)),branch:GH_BRANCH,sha});
-    toast("名字和排序已备份到仓库");
+    toast("名字和排序已备份到仓库 ☁️");
   }catch(e){toast("备份失败："+e.message);}
 }
 async function restoreNames(){
@@ -949,7 +912,7 @@ async function restoreNames(){
   try{
     const j=await gh("GET",API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now());
     applyBackup(JSON.parse(b64dec(j.content)));
-    toast("已恢复图片名字和排序");loadAll();
+    toast("已恢复图片名字和排序 ✅");loadAll();
   }catch(e){toast("恢复失败："+(e.message==="Not Found"?"仓库里还没有备份":e.message));}
 }
 async function autoRestoreNames(){
@@ -962,7 +925,7 @@ async function autoRestoreNames(){
 
 /* ================= 导出 ================= */
 const EXP_SYMS=[["","不加符号"],["：","中文冒号 ："],[":","英文冒号 :"],["，","中文逗号 ，"],[",","英文逗号 ,"]];
-const EXP_FMTS=[["box","文字框"],["txt","TXT 文本"],["json","JSON 数据"],["csv","CSV 表格"],["docx","DOCX 文档"]];
+const EXP_FMTS=[["box","📋 文字框"],["txt","📄 TXT"],["json","🧾 JSON"],["csv","📊 CSV"],["docx","📝 DOCX"]];
 let exp={fmt:lsGet("gh_exp_fmt")||"box",sym:lsGet("gh_exp_sym")===null?"：":lsGet("gh_exp_sym"),list:[]};
 
 function openExport(){
@@ -993,7 +956,7 @@ function renderExport(){
   <div class="actrow"><button class="b-main" onclick="expCopy()">一键复制</button>${exp.fmt!=="box"?'<button class="b-main" onclick="expDownload()">下载文件</button>':""}<button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("expText").value=genExport();
 }
-function expCopy(){copy($("expText").value,"已复制");}
+function expCopy(){copy($("expText").value,"已复制 ✅");}
 function saveBlob(blob,filename){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;
   document.body.appendChild(a);a.click();a.remove();
@@ -1007,7 +970,7 @@ function expDownload(){
   else if(exp.fmt==="json")saveBlob(new Blob([text],{type:"application/json;charset=utf-8"}),base+".json");
   else if(exp.fmt==="csv")saveBlob(new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"}),base+".csv");
   else if(exp.fmt==="docx")saveBlob(makeDocx(text.split(/\r?\n/)),base+".docx");
-  toast("已生成文件，请看浏览器的下载提示");
+  toast("已生成文件，请看浏览器的下载提示 💾");
 }
 
 /* 手写一个最简单的 docx（不依赖任何外部库） */
@@ -1074,14 +1037,14 @@ function renderStat(){
     <button class="b-gray b-mini" onclick="rebuildPages()">重新发布网站</button>
     <button class="b-gray b-mini" onclick="cleanHistory()">清理历史记录</button>
     <button class="b-gray b-mini" onclick="backupNames()">备份名字和排序</button>
-    <button class="b-gray b-mini restore-btn" onclick="restoreNames()"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M4 17v3h16v-3"/></svg> 恢复名字和排序</button></div>`;
+    <button class="b-gray b-mini" onclick="restoreNames()">⬇️ 恢复名字和排序</button></div>`;
   loadPagesStatus();
 }
 
 /* ================= 清理历史 ================= */
 async function cleanHistory(){
   if(running){toast("还在上传中，等传完再清理");return;}
-  if(!confirm("清理历史记录会把仓库的所有历史压成一条。\n\n现在的图片、分类、链接都不会变\n注意：之前删除的图片会彻底回收，再也找不回来\n注意：这个操作不能撤销\n\n确定继续吗？"))return;
+  if(!confirm("清理历史记录会把仓库的所有历史压成一条。\n\n✅ 现在的图片、分类、链接都不会变\n⚠️ 之前删除的图片会彻底回收，再也找不回来\n⚠️ 这个操作不能撤销\n\n确定继续吗？"))return;
   if(!confirm("再确认一次：真的要清理历史记录吗？"))return;
   try{
     toast("清理中…请稍等");
@@ -1090,7 +1053,7 @@ async function cleanHistory(){
     const commit=await gh("GET",GIT+"commits/"+head);
     const nc=await gh("POST",GIT+"commits",{message:"clean history",tree:commit.tree.sha,parents:[]});
     await gh("PATCH",GIT+"refs/heads/"+GH_BRANCH,{sha:nc.sha,force:true});
-    toast("历史记录已清理，GitHub 回收空间需要一点时间");
+    toast("历史记录已清理 ✅ GitHub 回收空间需要一点时间");
   }catch(e){toast("清理失败："+e.message);}
 }
 
@@ -1100,15 +1063,15 @@ async function loadPagesStatus(){
   const el=$("pstat");if(!el)return;
   try{
     const j=await gh("GET",REPO_API+"pages/builds/latest");
-    const map={built:"已发布",building:"发布中",queued:"排队中",errored:"发布失败"};
+    const map={built:"✅ 已发布",building:"⏳ 发布中",queued:"⏳ 排队中",errored:"❌ 出错"};
     const t=new Date(j.updated_at||j.created_at).toLocaleString();
     el.textContent="网站发布状态："+(map[j.status]||j.status)+(j.error&&j.error.message?"："+j.error.message:"")+"（"+t+"）";
-  }catch(e){el.textContent="网站发布状态：查不到（"+e.message+"）";}
+  }catch(e){el.textContent="🌐 网站发布状态：查不到（"+e.message+"）";}
 }
 async function rebuildPages(){
   try{
     await gh("POST",REPO_API+"pages/builds");
-    toast("已通知 GitHub 重新发布网站，约 1～5 分钟");
+    toast("已通知 GitHub 重新发布网站，约 1～5 分钟 🔁");
     setTimeout(loadPagesStatus,4000);
   }catch(e){toast("重新发布失败："+e.message);}
 }
@@ -1212,10 +1175,10 @@ function openReport(){
   const cnt=c=>bad.filter(r=>r.code===c).length;
   const unpub=cnt("unpub"),broken=cnt("empty")+cnt("bad"),net=cnt("net");
   let h=`<h3>检查结果</h3><div class="tip" style="font-size:13px">共检查 ${vals.length} 张，正常 ${vals.length-bad.length} 张，有问题 ${bad.length} 张。有问题的图片下面已经标出原因。</div>`;
-  if(unpub)h+=`<div class="lab">网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">重新发布网站</button></div>`;
-  if(broken)h+=`<div class="lab">文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">尝试修复</button><button class="b-red" onclick="cleanBad()">清理</button></div>`;
-  if(net)h+=`<div class="lab">网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
-  if(!bad.length)h+=`<div class="lab">全部正常</div>`;
+  if(unpub)h+=`<div class="lab">🌐 网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">重新发布网站</button></div>`;
+  if(broken)h+=`<div class="lab">💔 文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">尝试修复</button><button class="b-red" onclick="cleanBad()">清理</button></div>`;
+  if(net)h+=`<div class="lab">📶 网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
+  if(!bad.length)h+=`<div class="lab">🎉 全部正常</div>`;
   h+=`<div class="actrow"><button class="b-gray" onclick="closeSheet();checkList(reportList)">重新检查</button><button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
   $("sheet").innerHTML=h;$("sheetMask").classList.add("show");
 }
@@ -1251,7 +1214,7 @@ async function repairOne(f){
 async function repairBad(){
   const list=badItems(["empty","bad"]);
   if(!list.length)return;
-  if(!confirm(`尝试修复 ${list.length} 张？\n会转成 PNG 重新上传，旧文件删除。\n注意：链接会变（新文件名）。修不好的保持原样。`))return;
+  if(!confirm(`尝试修复 ${list.length} 张？\n会转成 PNG 重新上传，旧文件删除。\n⚠️ 链接会变（新文件名）。修不好的保持原样。`))return;
   closeSheet();let ok=0,bad=0;
   for(let i=0;i<list.length;i++){
     toast(`修复中 ${i+1}/${list.length}…`);
@@ -1345,11 +1308,11 @@ function jumpNextFrom(path){
     const j=(idx+k)%n;
     if(!names[items[j].path]){scrollToCard(cards[j]);return;}
   }
-  toast(names[path]?"没有未命名的了":"只剩这张没命名了");
+  toast(names[path]?"没有未命名的了 🎉":"只剩这张没命名了");
 }
 function jumpUnnamed(){
   const cards=[...document.querySelectorAll("#grid .file.unnamed")];
-  if(!cards.length){toast("没有未命名的了");return;}
+  if(!cards.length){toast("没有未命名的了 🎉");return;}
   const line=120;
   const next=cards.find(c=>c.getBoundingClientRect().top>line+8)||cards[0];
   scrollToCard(next);
@@ -1366,7 +1329,7 @@ function toggleHl(){
     c.classList.toggle("unnamed",hlUnnamed&&!!items[i]&&!names[items[i].path]);
   });
   updateHlBtn();
-  if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦");}
+  if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦 🎉");}
 }
 let popScroll=null;
 async function duplicateFile(f,where){
@@ -1397,7 +1360,7 @@ async function duplicateFile(f,where){
     const cur=items.map(x=>x.path);
     if(where==="side"){cur.splice(cur.indexOf(f.path)+1,0,np);}else cur.unshift(np);
     saveOrder(dir,cur);
-    toast(where==="side"?"已复制一份，就在原图旁边":"已复制一份，放在最前面（新链接约 1～2 分钟后生效）");
+    toast(where==="side"?"已复制一份，就在原图旁边 ✅":"已复制一份，放在最前面 ✅（新链接约 1～2 分钟后生效）");
     loadAll();
   }catch(e){toast("复制失败："+e.message);}
 }
@@ -1416,7 +1379,7 @@ async function copyImageFile(f){
   try{
     const pngP=(async()=>{const b=await fetchBlob(f);return b.type==="image/png"?b:await toPngBlob(b);})();
     await navigator.clipboard.write([new ClipboardItem({"image/png":pngP})]);
-    toast(ext(f.name)==="gif"?"已复制图片（动图复制后是静态图，想保留动画请用「分享原图文件」）":"已复制图片");
+    toast(ext(f.name)==="gif"?"已复制图片 ✅（动图复制后是静态图，想保留动画请用「分享原图文件」）":"已复制图片 ✅");
   }catch(e){toast("复制失败："+(e.message||"浏览器不允许")+"。可以试试「打开」后长按图片保存");}
 }
 function canShareFile(){
@@ -1440,14 +1403,14 @@ function openMore(f,entry,al,btn){
   add("☑️ 批量选择",()=>{if(!managing){managing=true;applyManage();}selected.add(f.path);const c=document.querySelector(`.file[data-path="${CSS.escape(f.path)}"]`);if(c)c.classList.add("sel");updateM();toast("已加入批量选择");});
   add("↔️ 调整卡片大小 / 完成",()=>{const on=[...document.querySelectorAll(".file")].some(c=>c.classList.contains("resize-enabled"));document.querySelectorAll(".file").forEach(c=>c.classList.toggle("resize-enabled",!on));toast(on?"已结束尺寸调整":"拖动卡片四角调整，最多两格；再点⋯可结束调整");});
   add("✏️ 改名字",()=>renameImg(f,al));
-  add("下一张未命名",()=>jumpNextFrom(f.path));
+  add("⏭ 下一张未命名",()=>jumpNextFrom(f.path));
   if(!entry.audio)add("✂️ 裁剪",()=>openCrop(f));
-  add("重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
-  if(!entry.audio)add("复制图片",()=>copyImageFile(f));
-  if(!entry.audio&&canShareFile())add("分享原图文件",()=>shareImageFile(f));
+  add("🔄 重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
+  if(!entry.audio)add("📋 复制图片",()=>copyImageFile(f));
+  if(!entry.audio&&canShareFile())add("📤 分享原图文件",()=>shareImageFile(f));
   add("➕ 复制一份到旁边",()=>duplicateFile(f,"side"));
-  add("复制一份到最前面",()=>duplicateFile(f,"top"));
-  if(!entry.audio)add("检查",()=>checkList([f]));
+  add("⬆️ 复制一份到最前面",()=>duplicateFile(f,"top"));
+  if(!entry.audio)add("🩺 检查",()=>checkList([f]));
   mask.onclick=closePop;
   mask.appendChild(pop);document.body.appendChild(mask);
   // 右边对齐 ⋯ 按钮、向左展开；靠近屏幕底部时改成向上展开
@@ -1483,7 +1446,7 @@ function buildCropUI(f,im,url){
   const handles=["nw","n","ne","e","se","s","sw","w"].map(t=>`<div class="ch ${t}" data-t="${t}"></div>`).join("");
   const m=document.createElement("div");m.id="cropMask";
   m.innerHTML=`<h3>裁剪这张图（${natW}×${natH}）</h3>
-  ${ext(f.name)==="gif"?'<div class="cnote">提示：这是 gif，裁剪后会变成静态图</div>':""}
+  ${ext(f.name)==="gif"?'<div class="cnote">⚠️ 这是 gif，裁剪后会变成静态图</div>':""}
   <div id="cropStage"><div id="cropWrap" style="width:${W}px;height:${H}px">
     <div class="dim" id="dT"></div><div class="dim" id="dB"></div><div class="dim" id="dL"></div><div class="dim" id="dR"></div>
     <div id="cropBox">${handles}</div></div></div>
@@ -1576,10 +1539,10 @@ function buildCropUI(f,im,url){
       if(!replace)orderInsertAfter(dir,f.path,np);else if(np!==f.path)orderReplace(dir,f.path,np);
       if(np!==f.path&&names[f.path]){names[np]=names[f.path];saveNamesLocal();}
       let msg;
-      if(!replace)msg="已另存为新图，就在原图旁边";
-      else if(overwrite)msg="裁剪完成，位置和链接都没变（网站缓存可能要几分钟才显示新图）";
+      if(!replace)msg="已另存为新图，就在原图旁边 ✅";
+      else if(overwrite)msg="裁剪完成 ✅ 位置和链接都没变（网站缓存可能要几分钟才显示新图）";
       else{
-        msg="裁剪完成，位置不变，但后缀变了，链接会变";
+        msg="裁剪完成 ✅ 位置不变，但后缀变了，链接会变";
         try{await delFile(f.path,f.sha);dropNames([f.path]);}
         catch(e){msg="新图已上传，但原图没删掉，可以手动删除";}
       }
@@ -1628,7 +1591,7 @@ async function delMany(list,label){
     toast(`${label} ${i+1}/${list.length}…`);
     try{await delFile(list[i].path,list[i].sha);dropNames([list[i].path]);ok++;}catch(e){bad++;}
   }
-  toast(bad?`删除完成：成功 ${ok}，失败 ${bad}`:`已删除 ${ok} 个`);
+  toast(bad?`删除完成：成功 ${ok}，失败 ${bad}`:`已删除 ${ok} 个 ✅`);
 }
 async function delSelected(){
   const list=items.filter(f=>selected.has(f.path));
@@ -1672,7 +1635,7 @@ function openMove(){
   if(!items.some(f=>selected.has(f.path))){toast("先点选要移动的图片");return;}
   if(running){toast("还在上传中，等传完再移动");return;}
   const sh=$("sheet");sh.innerHTML="";
-  const h=document.createElement("h3");h.textContent=`把选中的 ${selected.size} 张移动到…`;sh.appendChild(h);
+  const h=document.createElement("h3");h.textContent=`📦 把选中的 ${selected.size} 张移动到…`;sh.appendChild(h);
   tabs.filter(t=>inBase(t.dir)&&t.dir!==curDir).forEach(t=>{
     const b=document.createElement("button");b.className="b-gray";b.textContent=t.label;
     b.onclick=()=>doMove(t.dir);sh.appendChild(b);
@@ -1694,7 +1657,7 @@ async function doMove(destDir){
   closeSheet();
   try{
     const n=await moveFiles(list,destDir);
-    toast(`已移动 ${n} 张，新链接约 1～2 分钟后生效`);
+    toast(`已移动 ${n} 张 ✅ 新链接约 1～2 分钟后生效`);
     curDir=destDir;managing=false;loadAll();
   }catch(e){toast("移动失败："+e.message);}
 }
@@ -1739,31 +1702,45 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
     if(wrap.classList.contains('open'))positionActions();
   }
   function positionActions(){
-    const r=wrap.getBoundingClientRect(),size=42,orbSize=46,cx=r.left+orbSize/2,cy=r.top+orbSize/2,radius=65;
-    const defaults=[[-radius,-radius],[radius,-radius],[radius,radius],[-radius,radius]];
-    let saved={};try{saved=JSON.parse(lsGet('gh_float_actions')||'{}')}catch(_){}
+    const r=wrap.getBoundingClientRect(),orbSize=46,btnSize=42,radius=61;
+    const angles=[-90,0,90,180];
     buttons.forEach((b,i)=>{
-      let dx=defaults[i][0],dy=defaults[i][1];
-      if(saved[i]&&Number.isFinite(saved[i].x)&&Number.isFinite(saved[i].y)){dx=saved[i].x;dy=saved[i].y;}
-      let left=Math.max(6,Math.min(innerWidth-size-6,cx+dx-size/2));
-      let top=Math.max(8,Math.min(innerHeight-size-8,cy+dy-size/2));
+      const a=angles[i]*Math.PI/180;
+      let anglesToUse=angles;
+      const cx0=r.left+orbSize/2,cy0=r.top+orbSize/2;
+      const nearEdge=cx0<84||cx0>innerWidth-84||cy0<84||cy0>innerHeight-84;
+      if(nearEdge){
+        const inward=Math.atan2(innerHeight/2-cy0,innerWidth/2-cx0)*180/Math.PI;
+        anglesToUse=[inward-68,inward-23,inward+23,inward+68];
+      }
+      const angle=anglesToUse[i]*Math.PI/180;
+      const cx=cx0+Math.cos(angle)*radius;
+      const cy=cy0+Math.sin(angle)*radius;
+      const left=Math.max(6,Math.min(innerWidth-btnSize-6,cx-btnSize/2));
+      const top=Math.max(8,Math.min(innerHeight-btnSize-8,cy-btnSize/2));
       b.style.setProperty('--tx',(left-r.left)+'px');b.style.setProperty('--ty',(top-r.top)+'px');
-      b.dataset.tx=String(left-r.left);b.dataset.ty=String(top-r.top);
     });
   }
   try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
   orb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY;const r=wrap.getBoundingClientRect();ox=r.left;oy=r.top;moved=false;downAt=Date.now();orb.setPointerCapture?.(e.pointerId);});
-  orb.addEventListener('pointermove',e=>{if(!orb.hasPointerCapture?.(e.pointerId))return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}});
-  orb.addEventListener('pointerup',e=>{wrap.classList.remove('dragging');if(moved){const r=wrap.getBoundingClientRect();let x=r.left;if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;place(x,r.top,true);return;}if(Date.now()-downAt>650)return;wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');if(wrap.classList.contains('open'))positionActions();});
-  buttons.forEach((b,i)=>{
-    let px=0,py=0,tx=0,ty=0,dragged=false;
-    b.addEventListener('pointerdown',e=>{e.stopPropagation();px=e.clientX;py=e.clientY;tx=parseFloat(b.dataset.tx||0);ty=parseFloat(b.dataset.ty||0);dragged=false;b.classList.add('is-moving');b.setPointerCapture?.(e.pointerId);});
-    b.addEventListener('pointermove',e=>{if(!b.hasPointerCapture?.(e.pointerId))return;const dx=e.clientX-px,dy=e.clientY-py;if(Math.hypot(dx,dy)>5)dragged=true;if(!dragged)return;const r=wrap.getBoundingClientRect(),size=42,cx=r.left+tx+size/2,cy=r.top+ty+size/2;const nx=Math.max(6,Math.min(innerWidth-size-6,cx+dx-size/2-r.left)),ny=Math.max(8,Math.min(innerHeight-size-8,cy+dy-size/2-r.top));b.style.setProperty('--tx',nx+'px');b.style.setProperty('--ty',ny+'px');b.dataset.tx=String(nx);b.dataset.ty=String(ny);});
-    const finish=e=>{if(!b.hasPointerCapture?.(e.pointerId))return;b.releasePointerCapture?.(e.pointerId);b.classList.remove('is-moving');if(dragged){let saved={};try{saved=JSON.parse(lsGet('gh_float_actions')||'{}')}catch(_){}const r=wrap.getBoundingClientRect();saved[i]={x:parseFloat(b.dataset.tx||0)+r.left+21-(r.left+23),y:parseFloat(b.dataset.ty||0)+r.top+21-(r.top+23)};lsSet('gh_float_actions',JSON.stringify(saved));b.dataset.dragged='1';setTimeout(()=>delete b.dataset.dragged,250);e.preventDefault();}};
-    b.addEventListener('pointerup',finish);b.addEventListener('pointercancel',finish);
-    b.addEventListener('click',e=>{if(b.dataset.dragged==='1'){e.preventDefault();e.stopImmediatePropagation();delete b.dataset.dragged;}} ,true);
+  orb.addEventListener('pointermove',e=>{
+    if(!orb.hasPointerCapture?.(e.pointerId))return;
+    const dx=e.clientX-sx,dy=e.clientY-sy;
+    if(Math.abs(dx)+Math.abs(dy)>7){moved=true;wrap.classList.add('dragging');wrap.classList.remove('open');menu.setAttribute('aria-hidden','true');place(ox+dx,oy+dy,false);}
   });
-  window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.max(-23,Math.min(innerWidth-23,r.left)),Math.min(r.top,innerHeight-54),true);if(wrap.classList.contains('open'))positionActions();});
+  orb.addEventListener('pointerup',e=>{
+    wrap.classList.remove('dragging');
+    if(moved){
+      const r=wrap.getBoundingClientRect();let x=r.left;
+      /* Only tuck half off-screen when the user deliberately drags right to the edge. */
+      if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;
+      place(x,r.top,true);return;
+    }
+    if(Date.now()-downAt>650)return;
+    wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');
+    if(wrap.classList.contains('open'))positionActions();
+  });
+  window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.max(-23,Math.min(innerWidth-23,r.left)),Math.min(r.top,innerHeight-54),true);});
   document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
 })();
 function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('open');$('floatActions')?.setAttribute('aria-hidden','true');$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
@@ -1772,40 +1749,37 @@ let searchIndex=null,searchLoading=false;async function runSearch(){const q=$('s
 function jumpToPath(path){const c=[...document.querySelectorAll('.file')].find(x=>x.dataset.path===path);if(!c){toast('当前分类中暂时找不到这张图');return;}c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1500);}
 function beginResize(e,card,f,pos){
   e.preventDefault();e.stopPropagation();
-  if(resizeState)return;
-  const grid=$('grid'),thumb=card.querySelector('.thumb'),rect=card.getBoundingClientRect(),gridStyle=getComputedStyle(grid),gap=parseFloat(gridStyle.columnGap)||12;
-  const cols=Math.max(1,grid.querySelectorAll(':scope > .file').length?Math.round((grid.clientWidth+gap)/(gridStyle.gridTemplateColumns.split(' ').filter(Boolean).length?rect.width:rect.width)):2);
-  const tracks=gridStyle.gridTemplateColumns.split(' ').filter(Boolean);
-  const baseCol=(grid.clientWidth-gap*(Math.max(2,tracks.length)-1))/Math.max(2,tracks.length);
-  const before={gridColumn:card.style.gridColumn,height:thumb.style.height||'120px',span:card.dataset.customSpan||'1',customHeight:card.dataset.customHeight||''};
-  resizeState={card,f,pos,x:e.clientX,y:e.clientY,w:rect.width,h:thumb.getBoundingClientRect().height,baseCol,red:false,before};
+  const grid=$("grid"),thumb=card.querySelector('.thumb'),gridRect=grid.getBoundingClientRect(),rect=card.getBoundingClientRect();
+  const baseW=rect.width,baseH=thumb.getBoundingClientRect().height;
+  const minW=Math.max(72,(grid.clientWidth-12)/4),maxW=grid.clientWidth;
+  resizeState={card,f,pos,x:e.clientX,y:e.clientY,w:baseW,h:baseH,gridW:grid.clientWidth,minW,maxW,red:false,orig:{width:card.style.getPropertyValue('--card-width'),height:thumb.style.height,flex:card.style.flex,max:card.style.maxWidth}};
   card.classList.add('resize-enabled');
   const move=ev=>{
     if(!resizeState)return;
     const st=resizeState,dx=ev.clientX-st.x,dy=ev.clientY-st.y;
-    const wantsWidth=st.w+(pos.includes('e')?dx:-dx);
-    const wantsHeight=st.h+(pos.includes('s')?dy:-dy);
-    const minWidth=st.baseCol*.72,maxWidth=st.baseCol*2.02,minHeight=96,maxHeight=240;
-    st.red=wantsWidth<minWidth||wantsWidth>maxWidth||wantsHeight<minHeight||wantsHeight>maxHeight;
-    card.classList.toggle('resize-red',st.red);
-    if(st.red)return;
-    const span=wantsWidth>st.baseCol*1.42?2:1;
-    card.style.gridColumn='span '+span;
-    thumb.style.height=Math.round(Math.max(100,Math.min(240,wantsHeight)))+'px';
-    card.dataset.customSpan=String(span);card.dataset.customHeight=thumb.style.height;
+    const wantWide=st.w+(pos.includes('e')?dx:-dx),wantTall=st.h+(pos.includes('s')?dy:-dy);
+    const narrow=wantWide<st.minW,over=wantWide>st.maxW+2||wantTall>st.h*2.05;
+    st.red=narrow||over;card.classList.toggle('resize-red',st.red);
+    if(!st.red){
+      const width=Math.max(st.minW,Math.min(st.maxW,wantWide));
+      card.style.setProperty('--card-width',width+'px');
+      card.style.flex='0 0 '+width+'px';card.style.maxWidth=width+'px';
+      thumb.style.height=Math.max(90,Math.min(st.h*2,wantTall))+'px';
+      card.dataset.customWidth=Math.round(width/st.gridW*1000)/10+'%';
+      card.dataset.customHeight=thumb.style.height;
+    }
   };
   const end=()=>{
     document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',end);document.removeEventListener('pointercancel',end);
-    if(!resizeState)return;
-    const st=resizeState;st.card.classList.remove('resize-red','resize-enabled');
-    if(st.red){st.card.style.gridColumn='';thumb.style.height='120px';delete card.dataset.customSpan;delete card.dataset.customHeight;let saved={};try{saved=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(_){}delete saved[f.path];lsSet('gh_card_sizes',JSON.stringify(saved));toast('已恢复默认尺寸');}
-    else{let saved={};try{saved=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(_){}saved[f.path]={span:card.dataset.customSpan||'1',height:card.dataset.customHeight||'120px'};lsSet('gh_card_sizes',JSON.stringify(saved));toast('卡片尺寸已保存');}
+    if(!resizeState)return;const st=resizeState;st.card.classList.remove('resize-red');
+    if(st.red){st.card.style.removeProperty('--card-width');st.card.style.flex='';st.card.style.maxWidth='';st.card.querySelector('.thumb').style.height='120px';delete st.card.dataset.customWidth;delete st.card.dataset.customHeight;toast('已恢复原尺寸');}
+    else{const data={...JSON.parse(lsGet('gh_card_sizes')||'{}'),[st.f.path]:{width:st.card.dataset.customWidth||'50%',height:st.card.dataset.customHeight||'120px'}};lsSet('gh_card_sizes',JSON.stringify(data));toast('卡片尺寸已保存');}
     resizeState=null;
   };
   document.addEventListener('pointermove',move,{passive:false});document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
 }
-function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{const v=m[c.dataset.path];if(v){c.style.gridColumn='span '+Math.min(2,Math.max(1,+v.span||1));const th=c.querySelector('.thumb');if(th)th.style.height=v.height||'120px';}})}
-async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','大小一样'],['alias','命名一样'],['filename','文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
+function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{const v=m[c.dataset.path];if(v){const th=c.querySelector('.thumb');if(v.width){let w=String(v.width);if(w.endsWith('%')){const pct=Math.max(25,Math.min(100,parseFloat(w)||50));const px=$('grid').clientWidth*pct/100;c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';c.dataset.customWidth=w;}}else if(v.span===2){const px=$('grid').clientWidth;c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';}if(th)th.style.height=v.height||'120px';}})}
+async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','🔴 大小一样'],['alias','🟢 命名一样'],['filename','🔵 文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 async function dupeRename(path){const f={path,name:path.split('/').pop()};const v=await askText('修改图片命名（留空清除）',names[path]||'','输入新的命名');if(v===null)return;if(v.trim())names[path]=v.trim();else delete names[path];saveNamesLocal();toast('命名已更新');scanDuplicates('all');}
 function ignoreDupe(path){dupeIgnored.add(path);lsSet('gh_dupe_ignored',JSON.stringify([...dupeIgnored]));toast('已移出相似检测列表');scanDuplicates('all');}
