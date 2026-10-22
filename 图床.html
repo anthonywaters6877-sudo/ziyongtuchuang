@@ -211,6 +211,12 @@ input:focus{border-color:var(--p2)}
 .dragfloat{position:fixed !important;z-index:50;pointer-events:none;opacity:.93;box-shadow:0 14px 32px rgba(91,74,99,.45);margin:0}
 .dragbadge{position:absolute;right:10px;top:-8px;background:var(--p);color:#fff;border-radius:999px;padding:3px 10px;font-size:12px;z-index:60;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 body.dragging{-webkit-user-select:none;user-select:none}
+/* 三条杠：更细，贴着图框左边，不压图 */
+.thumb{padding-left:16px;box-sizing:border-box}
+.grip{left:0;top:0;bottom:0;width:14px;border-radius:0;background:#f4eaf9;box-shadow:none;border-right:1px solid #eadcf2}
+.grip i{width:7px;height:2px}
+.grip.hold{background:#ffb6d2}
+.pop{max-height:calc(100vh - 24px);overflow-y:auto}
 </style>
 </head>
 <body>
@@ -1170,6 +1176,38 @@ function toggleHl(){
   if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦 🎉");}
 }
 let popScroll=null;
+async function duplicateFile(f,where){
+  if(running){toast("还在上传中，等传完再复制");return;}
+  try{
+    toast("复制中…");
+    const dir=dirOfPath(f.path),pre=dir?dir+"/":"";
+    const ex=(f.name.match(/\.[^.]+$/)||[""])[0],stem=f.name.replace(/\.[^.]+$/,"");
+    let newName;
+    if(where==="side"){
+      let n=stem+"_copy"+ex,i=2;
+      while(items.some(x=>x.name===n)){n=stem+"_copy"+i+ex;i++;}
+      newName=n;
+    }else{
+      const base=disp(f.name).replace(/\.[^.]+$/,"");
+      let ts=Date.now();newName=ts+"_"+base+ex;
+      while(items.some(x=>x.name===newName)){ts++;newName=ts+"_"+base+ex;}
+    }
+    const np=pre+newName;
+    // 在 GitHub 上直接复制同一个文件：不用下载再上传，内容（包括动图）和原图一模一样
+    const ref=await gh("GET",GIT+"ref/heads/"+GH_BRANCH+"?t="+Date.now());
+    const head=ref.object.sha;
+    const commit=await gh("GET",GIT+"commits/"+head);
+    const nt=await gh("POST",GIT+"trees",{base_tree:commit.tree.sha,tree:[{path:np,mode:"100644",type:"blob",sha:f.sha}]});
+    const nc=await gh("POST",GIT+"commits",{message:"copy "+newName,tree:nt.sha,parents:[head]});
+    await gh("PATCH",GIT+"refs/heads/"+GH_BRANCH,{sha:nc.sha});
+    if(names[f.path]){names[np]=names[f.path];saveNamesLocal();}
+    const cur=items.map(x=>x.path);
+    if(where==="side"){cur.splice(cur.indexOf(f.path)+1,0,np);}else cur.unshift(np);
+    saveOrder(dir,cur);
+    toast(where==="side"?"已复制一份，就在原图旁边 ✅":"已复制一份，放在最前面 ✅（新链接约 1～2 分钟后生效）");
+    loadAll();
+  }catch(e){toast("复制失败："+e.message);}
+}
 async function toPngBlob(blob){
   let bmp;
   try{bmp=await createImageBitmap(blob);}
@@ -1212,6 +1250,8 @@ function openMore(f,entry,al,btn){
   add("🔄 重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
   if(!entry.audio)add("📋 复制图片",()=>copyImageFile(f));
   if(!entry.audio&&canShareFile())add("📤 分享原图文件",()=>shareImageFile(f));
+  add("➕ 复制一份到旁边",()=>duplicateFile(f,"side"));
+  add("⬆️ 复制一份到最前面",()=>duplicateFile(f,"top"));
   if(!entry.audio)add("🩺 检查",()=>checkList([f]));
   mask.onclick=closePop;
   mask.appendChild(pop);document.body.appendChild(mask);
