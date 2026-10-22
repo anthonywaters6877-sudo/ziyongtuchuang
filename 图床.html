@@ -346,6 +346,73 @@ body.dark .head-menu{background:#ffffff20;border-color:#ffffff48}
 @media(max-width:420px){header{padding:16px 15px 20px}header h1{font-size:19px}.card{padding:16px;border-radius:22px}#floatNav{z-index:70}}
 @media(prefers-reduced-motion:reduce){.float-actions button,#floatNav .float-orb,#drop{transition:none!important}}
 
+
+/* Final polish: compact more button attached to the inside of the outer card frame. */
+.file>.more{
+  top:6px !important;
+  right:7px !important;
+  width:29px !important;
+  height:25px !important;
+  min-width:0;
+  padding:0 !important;
+  display:grid;
+  place-items:center;
+  border-radius:8px !important;
+  background:color-mix(in srgb,var(--surface) 86%,transparent) !important;
+  border:1px solid color-mix(in srgb,var(--p2) 30%,var(--line)) !important;
+  box-shadow:0 2px 8px rgba(100,72,122,.13),inset 0 1px 0 #ffffff9c !important;
+  color:var(--p2) !important;
+  font-size:16px !important;
+  letter-spacing:0 !important;
+  line-height:1 !important;
+  backdrop-filter:blur(12px) saturate(1.2);
+  -webkit-backdrop-filter:blur(12px) saturate(1.2);
+  z-index:8;
+}
+.pop{
+  width:min(174px,calc(100vw - 20px)) !important;
+  max-width:calc(100vw - 20px);
+  max-height:min(42vh,300px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--p2) 48%,transparent) transparent;
+  padding:5px !important;
+  border-radius:13px !important;
+  background:color-mix(in srgb,var(--surface) 94%,transparent) !important;
+  color:var(--ink) !important;
+  border:1px solid var(--line) !important;
+  backdrop-filter:blur(18px) saturate(1.15);
+  -webkit-backdrop-filter:blur(18px) saturate(1.15);
+}
+.pop button{
+  display:block;
+  width:100%;
+  min-height:34px;
+  text-align:left;
+  white-space:normal !important;
+  line-height:1.35 !important;
+  padding:8px 9px !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:8px !important;
+  background:transparent !important;
+  color:var(--ink) !important;
+  font-size:12.5px !important;
+}
+.pop button+button{border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent) !important}
+.pop button:active,.pop button:focus-visible{background:color-mix(in srgb,var(--p) 12%,var(--surface)) !important;outline:none}
+.float-actions button.bubble-dragging{z-index:5;transition:none !important;opacity:1 !important;transform:translate(var(--tx),var(--ty)) scale(1) !important;box-shadow:0 12px 28px #130d2033,0 0 0 3px color-mix(in srgb,var(--p) 20%,transparent)}
+.float-actions button{touch-action:none;cursor:grab}
+.float-actions button.bubble-dragging{cursor:grabbing}
+.button-with-icon{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.button-with-icon .ui-icon{width:14px;height:14px;flex:none}
+body.dark .pop{background:color-mix(in srgb,var(--surface) 95%,transparent) !important;border-color:var(--line) !important;color:var(--ink) !important}
+body.dark .pop button{color:var(--ink) !important}
+
 </style>
 </head>
 <body>
@@ -711,7 +778,7 @@ function renderGrid(){
     gripAttach(grip,card,f);th.appendChild(grip);
     const rl=document.createElement("button");rl.className="rl";rl.textContent="↻";rl.title="重新加载";
     rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
-    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制 ✅");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制 ✅"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
+    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);nm.title=disp(f.name);nm.style.overflowX="auto";nm.style.whiteSpace="nowrap";nm.style.userSelect="text";nm.addEventListener("contextmenu",e=>{e.preventDefault();copy(disp(f.name),"文件名已复制");});let nameHold=null;nm.addEventListener("touchstart",()=>{nameHold=setTimeout(()=>copy(disp(f.name),"文件名已复制"),550);},{passive:true});["touchend","touchmove","touchcancel"].forEach(ev=>nm.addEventListener(ev,()=>clearTimeout(nameHold),{passive:true}));
     const acts=document.createElement("div");acts.className="acts";
     const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
     const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>openImg(f,url);
@@ -1039,7 +1106,7 @@ function renderStat(){
     <button class="b-gray b-mini" onclick="rebuildPages()">重新发布网站</button>
     <button class="b-gray b-mini" onclick="cleanHistory()">清理历史记录</button>
     <button class="b-gray b-mini" onclick="backupNames()">备份名字和排序</button>
-    <button class="b-gray b-mini" onclick="restoreNames()">⬇️ 恢复名字和排序</button></div>`;
+    <button class="b-gray b-mini button-with-icon" onclick="restoreNames()"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m-4-4 4 4 4-4M5 17v3h14v-3"/></svg><span>恢复名字和排序</span></button></div>`;
   loadPagesStatus();
 }
 
@@ -1421,9 +1488,8 @@ function openMore(f,entry,al,btn){
   let top=r.bottom+6;
   if(top+ph>window.innerHeight-10)top=Math.max(8,r.top-ph-6);
   pop.style.left=left+"px";pop.style.top=top+"px";
-  const t0=Date.now();
-  popScroll=()=>{if(Date.now()-t0<350)return;closePop();};
-  window.addEventListener("scroll",popScroll,{passive:true});
+  // Keep the compact menu alive while the user scrolls inside it; its own overflow area handles touch scrolling.
+  popScroll=null;
 }
 /* ================= 裁剪 ================= */
 async function openCrop(f){
@@ -1695,9 +1761,12 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
 (function initFloatingNav(){
   const wrap=$('floatNav'),orb=$('floatOrb'),menu=$('floatActions'),buttons=[...menu.querySelectorAll('button')];
   let sx=0,sy=0,ox=0,oy=0,moved=false,downAt=0;
+  const bubbleKey='gh_float_bubble_positions';
+  const readBubblePositions=()=>{try{return JSON.parse(lsGet(bubbleKey)||'{}')}catch(_){return {}}};
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   function place(x,y,save=true){
     const maxX=Math.max(-23,innerWidth-23),maxY=Math.max(8,innerHeight-54);
-    x=Math.max(-23,Math.min(maxX,x));y=Math.max(8,Math.min(maxY,y));
+    x=clamp(x,-23,maxX);y=clamp(y,8,maxY);
     wrap.style.left=x+'px';wrap.style.top=y+'px';wrap.style.right='auto';
     wrap.classList.toggle('edge-left',x<0);wrap.classList.toggle('edge-right',x>innerWidth-46);
     if(save)lsSet('gh_float_pos',JSON.stringify({x,y}));
@@ -1705,22 +1774,29 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
   }
   function positionActions(){
     const r=wrap.getBoundingClientRect(),orbSize=46,btnSize=42,radius=61;
-    const angles=[-90,0,90,180];
+    const angles=[-90,0,90,180],saved=readBubblePositions();
+    const cx0=r.left+orbSize/2,cy0=r.top+orbSize/2;
+    const nearEdge=cx0<84||cx0>innerWidth-84||cy0<84||cy0>innerHeight-84;
+    let anglesToUse=angles;
+    if(nearEdge){
+      const inward=Math.atan2(innerHeight/2-cy0,innerWidth/2-cx0)*180/Math.PI;
+      anglesToUse=[inward-68,inward-23,inward+23,inward+68];
+    }
     buttons.forEach((b,i)=>{
-      const a=angles[i]*Math.PI/180;
-      let anglesToUse=angles;
-      const cx0=r.left+orbSize/2,cy0=r.top+orbSize/2;
-      const nearEdge=cx0<84||cx0>innerWidth-84||cy0<84||cy0>innerHeight-84;
-      if(nearEdge){
-        const inward=Math.atan2(innerHeight/2-cy0,innerWidth/2-cx0)*180/Math.PI;
-        anglesToUse=[inward-68,inward-23,inward+23,inward+68];
+      let left,top;
+      const custom=saved[i];
+      if(custom&&Number.isFinite(custom.x)&&Number.isFinite(custom.y)){
+        left=clamp(custom.x,6,Math.max(6,innerWidth-btnSize-6));
+        top=clamp(custom.y,8,Math.max(8,innerHeight-btnSize-8));
+      }else{
+        const angle=anglesToUse[i]*Math.PI/180;
+        const cx0b=r.left+orbSize/2,cy0b=r.top+orbSize/2;
+        const cx=cx0b+Math.cos(angle)*radius,cy=cy0b+Math.sin(angle)*radius;
+        left=clamp(cx-btnSize/2,6,Math.max(6,innerWidth-btnSize-6));
+        top=clamp(cy-btnSize/2,8,Math.max(8,innerHeight-btnSize-8));
       }
-      const angle=anglesToUse[i]*Math.PI/180;
-      const cx=cx0+Math.cos(angle)*radius;
-      const cy=cy0+Math.sin(angle)*radius;
-      const left=Math.max(6,Math.min(innerWidth-btnSize-6,cx-btnSize/2));
-      const top=Math.max(8,Math.min(innerHeight-btnSize-8,cy-btnSize/2));
-      b.style.setProperty('--tx',(left-r.left)+'px');b.style.setProperty('--ty',(top-r.top)+'px');
+      b.style.setProperty('--tx',(left-r.left)+'px');
+      b.style.setProperty('--ty',(top-r.top)+'px');
     });
   }
   try{const pos=JSON.parse(lsGet('gh_float_pos')||'null');if(pos)place(pos.x,pos.y,false);else place(16,innerHeight*.42,false)}catch(e){place(16,innerHeight*.42,false)}
@@ -1734,7 +1810,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
     wrap.classList.remove('dragging');
     if(moved){
       const r=wrap.getBoundingClientRect();let x=r.left;
-      /* Only tuck half off-screen when the user deliberately drags right to the edge. */
       if(x<=5)x=-23;else if(x>=innerWidth-51)x=innerWidth-23;
       place(x,r.top,true);return;
     }
@@ -1742,7 +1817,45 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()
     wrap.classList.toggle('open');menu.setAttribute('aria-hidden',wrap.classList.contains('open')?'false':'true');
     if(wrap.classList.contains('open'))positionActions();
   });
-  window.addEventListener('resize',()=>{const r=wrap.getBoundingClientRect();place(Math.max(-23,Math.min(innerWidth-23,r.left)),Math.min(r.top,innerHeight-54),true);});
+  // Every shortcut bubble can be moved separately. Its screen position is saved independently,
+  // and a drag suppresses the click action so it will not navigate by accident.
+  buttons.forEach((b,i)=>{
+    let d=null;
+    b.addEventListener('pointerdown',e=>{
+      const r=b.getBoundingClientRect();
+      d={id:e.pointerId,sx:e.clientX,sy:e.clientY,x:r.left,y:r.top,moved:false};
+      try{b.setPointerCapture?.(e.pointerId)}catch(_){}
+    });
+    b.addEventListener('pointermove',e=>{
+      if(!d||d.id!==e.pointerId)return;
+      const dx=e.clientX-d.sx,dy=e.clientY-d.sy;
+      if(!d.moved&&Math.hypot(dx,dy)>6){d.moved=true;b.classList.add('bubble-dragging');}
+      if(!d.moved)return;
+      if(e.cancelable)e.preventDefault();
+      const left=clamp(d.x+dx,6,Math.max(6,innerWidth-48));
+      const top=clamp(d.y+dy,8,Math.max(8,innerHeight-50));
+      const wr=wrap.getBoundingClientRect();
+      b.style.setProperty('--tx',(left-wr.left)+'px');b.style.setProperty('--ty',(top-wr.top)+'px');
+    });
+    const finishBubbleDrag=e=>{
+      if(!d||d.id!==e.pointerId)return;
+      if(d.moved){
+        const r=b.getBoundingClientRect(),positions=readBubblePositions();
+        positions[i]={x:clamp(r.left,6,Math.max(6,innerWidth-48)),y:clamp(r.top,8,Math.max(8,innerHeight-50))};
+        lsSet(bubbleKey,JSON.stringify(positions));
+        b._suppressClick=true;
+        setTimeout(()=>{b._suppressClick=false;},700);
+      }
+      b.classList.remove('bubble-dragging');d=null;
+    };
+    b.addEventListener('pointerup',finishBubbleDrag);
+    b.addEventListener('pointercancel',finishBubbleDrag);
+    b.addEventListener('click',e=>{if(b._suppressClick){e.preventDefault();e.stopImmediatePropagation();b._suppressClick=false;}},true);
+  });
+  window.addEventListener('resize',()=>{
+    const r=wrap.getBoundingClientRect();place(clamp(r.left,-23,innerWidth-23),clamp(r.top,8,innerHeight-54),true);
+    if(wrap.classList.contains('open'))positionActions();
+  });
   document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open');menu.setAttribute('aria-hidden','true')}});
 })();
 function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('open');$('floatActions')?.setAttribute('aria-hidden','true');$('searchDock').classList.add('show');$('searchInput').focus({preventScroll:true});runSearch();}
