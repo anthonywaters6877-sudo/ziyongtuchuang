@@ -146,7 +146,7 @@ input:focus{border-color:var(--p2)}
 /* ⋯ 按钮放右上角，带边框，略微上移 */
 .file{padding-top:14px}
 .chk{top:20px;left:14px}
-.file>.more{position:absolute;top:-10px;right:9px;width:34px;height:28px;padding:0;border-radius:11px;background:rgba(255,255,255,.96);border:1px solid #edc9e3;box-shadow:0 3px 10px rgba(183,156,255,.32);color:var(--p2);font-size:17px;letter-spacing:1px;line-height:24px;z-index:6;backdrop-filter:blur(8px)}
+.file>.more{position:absolute;top:-5px;right:5px;width:30px;height:24px;padding:0;border-radius:9px;background:rgba(255,255,255,.97);border:1px solid #edc9e3;box-shadow:0 2px 7px rgba(183,156,255,.24);color:var(--p2);font-size:16px;letter-spacing:1px;line-height:21px;z-index:8;backdrop-filter:blur(8px)}
 .managing .more{display:none}
 /* 名字展开小箭头 */
 .head{display:flex;align-items:flex-start;gap:4px}
@@ -157,8 +157,8 @@ input:focus{border-color:var(--p2)}
 .chevbtn.up i{transform:rotate(-135deg);margin-top:2px}
 /* 小浮层菜单 */
 #popMask{position:fixed;inset:0;z-index:40}
-.pop{position:fixed;background:rgba(255,255,255,.96);border:1px solid #ead5e8;border-radius:16px;box-shadow:0 8px 24px rgba(91,74,99,.22);padding:6px;min-width:136px;max-width:min(240px,calc(100vw - 24px));max-height: min(52dvh, 420px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;z-index:41;backdrop-filter:blur(16px)}
-.pop button{display:block;width:100%;text-align:left;background:none;border-radius:10px;padding:9px 11px;font-size:13px;line-height:1.35;color:var(--text);white-space:normal;min-height:36px}
+.pop{position:fixed;background:rgba(255,255,255,.97);border:1px solid #ead5e8;border-radius:14px;box-shadow:0 6px 18px rgba(91,74,99,.18);padding:4px;width:min(208px,calc(100vw - 28px));min-width:0;max-width:calc(100vw - 28px);max-height:min(38vh,270px);max-height:min(38dvh,270px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;z-index:41;backdrop-filter:blur(16px)}
+.pop button{display:block;width:100%;text-align:left;background:none;border-radius:9px;padding:7px 9px;font-size:12px;line-height:1.3;color:var(--text);white-space:normal;min-height:30px;margin:1px 0}
 .pop button:active{background:#f6eefb}
 /* 裁剪 */
 #cropMask{position:fixed;inset:0;background:#241a2e;z-index:50;display:flex;flex-direction:column;align-items:center;padding:14px 12px calc(14px + env(safe-area-inset-bottom,0px));color:#fff;overflow:auto;overscroll-behavior:contain}
@@ -214,7 +214,7 @@ input:focus{border-color:var(--p2)}
 body.dragging{-webkit-user-select:none;user-select:none}
 /* 缩略图左侧为排序轨道预留独立空间，避免遮挡图片 */
 .thumb{padding-left:16px;box-sizing:border-box}
-.pop{max-height:calc(100vh - 24px);overflow-y:auto}
+.pop{max-height:min(38vh,270px);max-height:min(38dvh,270px);overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch}
 
 /* ===== 进阶功能：侧栏、搜索、卡片尺寸、相似检测、暗色主题 ===== */
 :root{--bg:#fff6fb;--surface:#fff;--ink:#5b4a63;--line:#f3dcea}
@@ -1402,7 +1402,6 @@ function openMore(f,entry,al,btn){
     b.onclick=e=>{e.stopPropagation();closePop();fn();};pop.appendChild(b);
   };
   add("批量选择",()=>{if(!managing){managing=true;applyManage();}selected.add(f.path);const c=document.querySelector(`.file[data-path="${CSS.escape(f.path)}"]`);if(c)c.classList.add("sel");updateM();toast("已加入批量选择");});
-  add("调整卡片大小 / 完成",()=>{const on=[...document.querySelectorAll(".file")].some(c=>c.classList.contains("resize-enabled"));document.querySelectorAll(".file").forEach(c=>c.classList.toggle("resize-enabled",!on));toast(on?"已结束尺寸调整":"拖动卡片四角调整，最多两格；再点⋯可结束调整");});
   add("恢复这张图片的原尺寸",()=>restoreOneCardSize(f));
   add("改名字",()=>renameImg(f,al));
   add("下一张未命名",()=>jumpNextFrom(f.path));
@@ -1749,6 +1748,35 @@ function startSearchMode(){searchActive=true;$('floatNav')?.classList.remove('op
 function clearSearch(){searchActive=false;$('searchInput').value='';$('searchResults').innerHTML='';$('searchDock').classList.remove('show');document.querySelectorAll('.file.search-hit').forEach(c=>c.classList.remove('search-hit'));}
 let searchIndex=null,searchLoading=false;async function runSearch(){const q=$('searchInput').value.trim().toLowerCase(),out=$('searchResults');out.innerHTML='';if(!q){out.textContent='输入命名或文件名进行搜索';return;}if(!searchIndex&&!searchLoading){searchLoading=true;out.textContent='正在搜索整个仓库…';try{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());searchIndex=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}catch(e){searchIndex=items.slice();toast('全仓库搜索失败，暂时搜索当前分类');}finally{searchLoading=false;}}if(searchLoading)return;const source=searchIndex||items;const all=source.filter(f=>(names[f.path]||'').toLowerCase().includes(q)||disp(f.name).toLowerCase().includes(q)||f.name.toLowerCase().includes(q));if(!all.length){out.textContent='没有找到匹配的文件';return;}all.slice(0,100).forEach(f=>{const b=document.createElement('button');b.textContent=(names[f.path]||disp(f.name))+' · '+catName(dirOfPath(f.path));b.onclick=()=>{if(dirOfPath(f.path)!==curDir){curDir=dirOfPath(f.path);loadAll().then(()=>jumpToPath(f.path));}else jumpToPath(f.path);};out.appendChild(b);});}
 function jumpToPath(path){const c=[...document.querySelectorAll('.file')].find(x=>x.dataset.path===path);if(!c){toast('当前分类中暂时找不到这张图');return;}c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1500);}
+function applyResizeFlowOrders(){
+  const grid=$("grid");
+  if(!grid)return;
+  const cards=[...grid.querySelectorAll(".file")];
+  if(!cards.length)return;
+  cards.forEach((c,i)=>{c.style.order=String(i*10);});
+  const gridW=grid.clientWidth;
+  const styles=getComputedStyle(grid);
+  let cols=2;
+  if(styles.display==="grid"){
+    const tracks=(styles.gridTemplateColumns||"").trim().split(/\s+/).filter(Boolean);
+    if(tracks.length)cols=tracks.length;
+  }
+  const gap=parseFloat(styles.columnGap)||12;
+  const slotW=(gridW-gap*(cols-1))/cols;
+  for(let i=cols-1;i<cards.length;i+=cols){
+    const c=cards[i],mate=cards[i-1];
+    const saved=String(c.dataset.customWidth||"");
+    const savedWidth=saved.endsWith("%")?gridW*(parseFloat(saved)||0)/100:(parseFloat(saved)||c.getBoundingClientRect().width);
+    const promoted=c.classList.contains("resize-promoted")||savedWidth>slotW+1;
+    if(promoted&&mate){
+      // Swap only this row's visual order: the enlarged right card stays on this row,
+      // and its left-hand neighbor flows to the next row. Data/order in GitHub is untouched.
+      c.style.order=String((i-1)*10);
+      mate.style.order=String(i*10);
+    }
+  }
+}
+
 function beginResize(e,card,f,pos){
   if(e.button!==undefined&&e.button!==0)return;
   e.preventDefault();e.stopPropagation();
@@ -1756,7 +1784,17 @@ function beginResize(e,card,f,pos){
   const gridW=grid.clientWidth,baseW=rect.width,baseH=tr.height;
   const availableW=Math.max(180,gridW-12),minW=Math.min(availableW,Math.max(92,availableW*.25)),maxW=availableW;
   const original={width:card.style.getPropertyValue('--card-width'),height:thumb.style.height,flex:card.style.flex,max:card.style.maxWidth,customWidth:card.dataset.customWidth,customHeight:card.dataset.customHeight};
-  resizeState={card,f,pos,x:e.clientX,y:e.clientY,w:baseW,h:baseH,gridW,availableW,minW,maxW,red:false,orig:original};
+  const styles=getComputedStyle(grid);
+  let cols=2;
+  if(styles.display==="grid"){
+    const tracks=(styles.gridTemplateColumns||"").trim().split(/\s+/).filter(Boolean);
+    if(tracks.length)cols=tracks.length;
+  }
+  const cards=[...grid.querySelectorAll(".file")],index=cards.indexOf(card);
+  const gap=parseFloat(styles.columnGap)||12;
+  const slotW=(gridW-gap*(cols-1))/cols;
+  const wasRightColumn=index>=0&&(index%cols===cols-1);
+  resizeState={card,f,pos,x:e.clientX,y:e.clientY,w:baseW,h:baseH,gridW,availableW,minW,maxW,slotW,wasRightColumn,red:false,orig:original};
   card.classList.add('resize-enabled');
   try{e.target.setPointerCapture?.(e.pointerId)}catch(_){}
   const move=ev=>{
@@ -1774,6 +1812,11 @@ function beginResize(e,card,f,pos){
       thumb.style.height=Math.max(90,Math.min(480,st.h*2,wantTall))+'px';
       card.dataset.customWidth=(width/st.gridW*100).toFixed(2)+'%';
       card.dataset.customHeight=thumb.style.height;
+      if(st.wasRightColumn){
+        if(!card.classList.contains('resize-promoted')&&width>st.slotW+1)card.classList.add('resize-promoted');
+        else if(card.classList.contains('resize-promoted')&&width<st.slotW-5)card.classList.remove('resize-promoted');
+      }
+      applyResizeFlowOrders();
     }
   };
   const end=()=>{
@@ -1785,9 +1828,10 @@ function beginResize(e,card,f,pos){
       st.card.querySelector('.thumb').style.height=st.orig.height;
       if(st.orig.customWidth)st.card.dataset.customWidth=st.orig.customWidth;else delete st.card.dataset.customWidth;
       if(st.orig.customHeight)st.card.dataset.customHeight=st.orig.customHeight;else delete st.card.dataset.customHeight;
+      st.card.classList.remove('resize-promoted');applyResizeFlowOrders();
       toast('已恢复拖动前尺寸');
     }else{
-      const data={...JSON.parse(lsGet('gh_card_sizes')||'{}'),[st.f.path]:{width:st.card.dataset.customWidth||'50%',height:st.card.dataset.customHeight||'120px'}};lsSet('gh_card_sizes',JSON.stringify(data));toast('卡片尺寸已保存');
+      const data={...JSON.parse(lsGet('gh_card_sizes')||'{}'),[st.f.path]:{width:st.card.dataset.customWidth||'50%',height:st.card.dataset.customHeight||'120px'}};lsSet('gh_card_sizes',JSON.stringify(data));applyResizeFlowOrders();toast('卡片尺寸已保存');
     }
     resizeState=null;
   };
@@ -1802,7 +1846,7 @@ function restoreAllCardSizes(){
   lsSet("gh_card_sizes","{}");
   const y=window.scrollY;renderGrid();window.scrollTo(0,y);toast("所有图片已恢复原尺寸");
 }
-function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{const v=m[c.dataset.path];if(v){const th=c.querySelector('.thumb');if(v.width){let w=String(v.width);if(w.endsWith('%')){const pct=Math.max(25,Math.min(100,parseFloat(w)||50));const px=Math.max(92,Math.min($('grid').clientWidth-12,$('grid').clientWidth*pct/100));c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';c.dataset.customWidth=w;}}else if(v.span===2){const px=$('grid').clientWidth;c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';}if(th)th.style.height=v.height||'120px';}})}
+function restoreCardSizes(){let m={};try{m=JSON.parse(lsGet('gh_card_sizes')||'{}')}catch(e){}document.querySelectorAll('.file').forEach(c=>{c.style.order='';c.classList.remove('resize-promoted');const v=m[c.dataset.path];if(v){const th=c.querySelector('.thumb');if(v.width){let w=String(v.width);if(w.endsWith('%')){const pct=Math.max(25,Math.min(100,parseFloat(w)||50));const px=Math.max(92,Math.min($('grid').clientWidth-12,$('grid').clientWidth*pct/100));c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';c.dataset.customWidth=w;}}else if(v.span===2){const px=$('grid').clientWidth;c.style.setProperty('--card-width',px+'px');c.style.flex='0 0 '+px+'px';c.style.maxWidth=px+'px';}if(th)th.style.height=v.height||'120px';}});applyResizeFlowOrders();}
 async function scanDuplicates(scope){if(!getToken()){toast('请先保存 Token');return;}const box=$('dupeResults');box.innerHTML='<p class="tip">正在读取仓库文件并检测…</p>';try{let files=[];if(scope==='current'){files=items.slice();}else{const j=await gh('GET',GIT+'trees/'+GH_BRANCH+'?recursive=1&t='+Date.now());files=(j.tree||[]).filter(x=>x.type==='blob'&&OK_EXT.includes(ext(x.path))).map(x=>({name:x.path.split('/').pop(),path:x.path,sha:x.sha,size:x.size||0,thumb:siteUrl(x.path)}));}const groups={size:new Map(),alias:new Map(),filename:new Map()};files.forEach(f=>{if(f.size){const k=String(f.size);if(!groups.size.has(k))groups.size.set(k,[]);groups.size.get(k).push(f);}const a=(names[f.path]||'').trim().toLowerCase();if(a){if(!groups.alias.has(a))groups.alias.set(a,[]);groups.alias.get(a).push(f);}const n=disp(f.name).toLowerCase();if(n){if(!groups.filename.has(n))groups.filename.set(n,[]);groups.filename.get(n).push(f);}});const used=new Set();const sections=[['size','🔴 大小一样'],['alias','🟢 命名一样'],['filename','🔵 文件名一样']];let html='';sections.forEach(([key,title])=>{let sets=[...groups[key].entries()].filter(([k,a])=>a.length>1).map(([k,a])=>a).filter(a=>a.some(f=>!dupeIgnored.has(f.path)));let visible=[];sets.forEach(a=>{const fresh=a.filter(f=>!used.has(f.path)&&!dupeIgnored.has(f.path));if(fresh.length>1){fresh.forEach(f=>used.add(f.path));visible.push(fresh);}});html+=`<section class="dupe-section"><button class="dupe-head" onclick="this.parentElement.classList.toggle('open')">${title} · ${visible.length} 组　⌄</button><div class="dupe-body">`;if(!visible.length)html+='<p class="tip">没有发现需要处理的重复项</p>';visible.forEach((a,i)=>{html+=`<div class="dupe-group"><h4>第 ${i+1} 组 · ${a.length} 个文件</h4><div class="dupe-files">`;a.forEach(f=>{const alias=names[f.path]||'';const flags=[key==='size',!!alias, true];const src=siteUrl(f.path);html+=`<div class="dupe-item"><img loading="lazy" src="${src.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onerror="this.style.display='none'"><div class="dfname" title="长按或横向滑动查看文件名">${escapeHtml(disp(f.name))}</div><div class="dinfo">分类：${escapeHtml(catName(dirOfPath(f.path)))}<br>命名：${escapeHtml(alias||'未命名（使用文件名）')}<br>大小：${fmtSize(f.size)}</div><div class="lights"><i class="light size ${f.size===a[0].size?'on':''}"></i><i class="light alias ${alias&&alias.toLowerCase()===((names[a[0].path]||'').toLowerCase())?'on':''}"></i><i class="light filename ${f.name.toLowerCase()===a[0].name.toLowerCase()?'on':''}"></i></div><div class="dactions"><button class="b-gray" onclick="dupeRename('${jsq(f.path)}')">改名</button><button class="b-gray" onclick="ignoreDupe('${jsq(f.path)}')">移出</button><button class="b-red" onclick="dupeDelete('${jsq(f.path)}')">删除</button></div></div>`;});html+='</div></div>';});html+='</div></section>';});box.innerHTML=html;toast('检测完成');}catch(e){box.innerHTML='<p class="tip">检测失败：'+escapeHtml(e.message)+'</p>';}}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}function jsq(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 async function dupeRename(path){const f={path,name:path.split('/').pop()};const v=await askText('修改图片命名（留空清除）',names[path]||'','输入新的命名');if(v===null)return;if(v.trim())names[path]=v.trim();else delete names[path];saveNamesLocal();toast('命名已更新');scanDuplicates('all');}
