@@ -195,6 +195,8 @@ input:focus{border-color:var(--p2)}
 .sw.on{box-shadow:0 0 0 2.5px var(--text)}
 .hlcustom{position:relative;width:26px;height:26px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 1.5px #e6d5ee;background:conic-gradient(#ff5c5c,#ffd24d,#7ee05a,#4dd2ff,#6a6aff,#d36bff,#ff5c5c)}
 .hlcustom input{position:absolute;left:-10px;top:-10px;width:50px;height:50px;opacity:0;cursor:pointer}
+@keyframes flashpulse{0%{transform:scale(1)}30%{transform:scale(1.04);box-shadow:0 0 0 6px rgba(255,143,184,.55)}100%{transform:scale(1)}}
+.file.flash{animation:flashpulse 1.4s ease}
 </style>
 </head>
 <body>
@@ -513,7 +515,7 @@ function renderGrid(){
     else{
       const im=document.createElement("img");im.loading="lazy";th.appendChild(im);
       const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="😢 加载失败<br>点这里重试";
-      fb.onclick=e=>{e.stopPropagation();loadImg(f,im,true);};th.appendChild(fb);
+      fb.onclick=e=>{e.stopPropagation();loadImg(f,im,true,true);};th.appendChild(fb);
       entry.el=im;loadImg(f,im,false);
     }
     thumbs.push(entry);
@@ -521,8 +523,8 @@ function renderGrid(){
     rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
     const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);
     const acts=document.createElement("div");acts.className="acts";
-    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url);
-    const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>window.open(url,"_blank");
+    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url,isFresh(f.path)?"链接已复制 ✅（刚改过的图，公开链接几分钟后才会显示新图）":undefined);
+    const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>openImg(f,url);
     const b3=document.createElement("button");b3.className="b-red";b3.textContent="删除";b3.onclick=()=>delOne(f);
     acts.append(b1,b2,b3);
     const al=document.createElement("div");
@@ -827,7 +829,7 @@ async function heicToPng(blob){
 async function fetchBlob(f){
   const r=await fetch(API+encPath(f.path)+"?ref="+GH_BRANCH+"&r="+Date.now(),{headers:{"Authorization":"token "+getToken(),"Accept":"application/vnd.github.raw"},cache:"no-store"});
   if(!r.ok)throw new Error("下载失败 "+r.status);
-  return r.blob();
+  return new Blob([await r.blob()],{type:mimeOf(f.name)});
 }
 async function probe(f){
   if(AUD.includes(ext(f.name)))return {ok:true};
@@ -932,26 +934,33 @@ async function cleanBad(){
 }
 
 /* ================= 重新加载图片 ================= */
-let thumbs=[];let arrows=[];const freshPaths=new Set();
-function loadImg(f,im,force){
+let thumbs=[];let arrows=[];function freshMap(){try{return JSON.parse(lsGet("gh_fresh")||"{}")}catch(e){return {}}}
+function markFresh(path){const m=freshMap(),now=Date.now();m[path]=now;for(const k in m)if(now-m[k]>3600e3)delete m[k];lsSet("gh_fresh",JSON.stringify(m));}
+function isFresh(path){const t=freshMap()[path];return !!t&&Date.now()-t<30*60*1000;}
+const MIMES={png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",webp:"image/webp",svg:"image/svg+xml",bmp:"image/bmp",ico:"image/x-icon"};
+const mimeOf=n=>MIMES[ext(n)]||"application/octet-stream";
+function loadImg(f,im,force,apiFirst){
   const th=im.parentNode,fb=th.querySelector(".thfail");
   fb.style.display="none";im.style.display="";
+  if(im._bu){URL.revokeObjectURL(im._bu);im._bu=null;}
+  const fresh=isFresh(f.path);
+  const bust=(force||fresh)?Date.now():0;
+  const useApi=!!apiFirst||fresh;   // 刚改过的图 / 单张重载：直接走接口，拿到的一定是最新版本
   const srcs=[f.thumb,siteUrl(f.path)].filter(Boolean);
-  const bust=(force||freshPaths.has(f.path))?Date.now():0;
   let i=0;
   const give=()=>{im.style.display="none";fb.style.display="flex";};
-  const set=()=>{const u=srcs[i];im.src=u+(bust?(u.includes("?")?"&":"?")+"r="+bust:"");};
-  // 第3条通道：直接用 GitHub 接口下载（有时候前两条打不开，这条能通）
-  const viaApi=async()=>{
+  const setSrc=()=>{const u=srcs[i];im.src=u+(bust?(u.includes("?")?"&":"?")+"r="+bust:"");};
+  const chain=()=>{i=0;im.onerror=()=>{i++;if(i<srcs.length)setSrc();else viaApi(give);};setSrc();};
+  const viaApi=async next=>{
     try{
       const r=await fetch(API+encPath(f.path)+"?ref="+GH_BRANCH+"&r="+Date.now(),{headers:{"Authorization":"token "+getToken(),"Accept":"application/vnd.github.raw"},cache:"no-store"});
       if(!r.ok)throw new Error("x");
-      const b=await r.blob();
-      im.onerror=give;im.src=URL.createObjectURL(b);
-    }catch(e){give();}
+      const b=new Blob([await r.blob()],{type:mimeOf(f.name)});
+      im.onerror=()=>next();
+      im._bu=URL.createObjectURL(b);im.src=im._bu;
+    }catch(e){next();}
   };
-  im.onerror=()=>{i++;if(i<srcs.length)set();else viaApi();};
-  set();
+  if(useApi)viaApi(chain);else chain();
 }
 function refreshArrow(al){
   const b=al.parentNode&&al.parentNode.querySelector(".chevbtn");if(!b)return;
@@ -987,12 +996,26 @@ function applyHlColor(hex,save){
   $("hlPick").oninput=e=>applyHlColor(e.target.value,true);
   applyHlColor(lsGet("gh_hl_color")||HL_PRESETS[0],false);
 })();
+function flashCard(c){c.classList.remove("flash");void c.offsetWidth;c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),1600);}
+function scrollToCard(c){
+  window.scrollTo({top:window.scrollY+c.getBoundingClientRect().top-120,behavior:"smooth"});
+  flashCard(c);
+}
+function jumpNextFrom(path){
+  const cards=[...document.querySelectorAll("#grid .file")];
+  const idx=items.findIndex(f=>f.path===path),n=items.length;
+  for(let k=1;k<n;k++){
+    const j=(idx+k)%n;
+    if(!names[items[j].path]){scrollToCard(cards[j]);return;}
+  }
+  toast(names[path]?"没有未命名的了 🎉":"只剩这张没命名了");
+}
 function jumpUnnamed(){
   const cards=[...document.querySelectorAll("#grid .file.unnamed")];
   if(!cards.length){toast("没有未命名的了 🎉");return;}
   const line=120;
   const next=cards.find(c=>c.getBoundingClientRect().top>line+8)||cards[0];
-  window.scrollTo({top:window.scrollY+next.getBoundingClientRect().top-line,behavior:"smooth"});
+  scrollToCard(next);
 }
 function unnamedCount(){return items.filter(f=>!names[f.path]).length;}
 function updateHlBtn(){
@@ -1008,7 +1031,8 @@ function toggleHl(){
   updateHlBtn();
   if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦 🎉");}
 }
-function closePop(){const m=document.getElementById("popMask");if(m)m.remove();}
+let popScroll=null;
+function closePop(){const m=document.getElementById("popMask");if(m)m.remove();if(popScroll){window.removeEventListener("scroll",popScroll);popScroll=null;}}
 function openMore(f,entry,al,btn){
   closePop();
   const mask=document.createElement("div");mask.id="popMask";
@@ -1018,8 +1042,9 @@ function openMore(f,entry,al,btn){
     b.onclick=e=>{e.stopPropagation();closePop();fn();};pop.appendChild(b);
   };
   add("✏️ 改名字",()=>renameImg(f,al));
+  add("⏭ 下一张未命名",()=>jumpNextFrom(f.path));
   if(!entry.audio)add("✂️ 裁剪",()=>openCrop(f));
-  add("🔄 重新加载",()=>{reloadOne(entry);toast("重新加载中…");});
+  add("🔄 重新加载",()=>{reloadOne(entry,true);toast("重新加载中…");});
   if(!entry.audio)add("🩺 检查",()=>checkList([f]));
   mask.onclick=closePop;
   mask.appendChild(pop);document.body.appendChild(mask);
@@ -1029,7 +1054,9 @@ function openMore(f,entry,al,btn){
   let top=r.bottom+6;
   if(top+ph>window.innerHeight-10)top=Math.max(8,r.top-ph-6);
   pop.style.left=left+"px";pop.style.top=top+"px";
-  window.addEventListener("scroll",closePop,{once:true,passive:true});
+  const t0=Date.now();
+  popScroll=()=>{if(Date.now()-t0<350)return;closePop();};
+  window.addEventListener("scroll",popScroll,{passive:true});
 }
 /* ================= 裁剪 ================= */
 async function openCrop(f){
@@ -1143,7 +1170,7 @@ function buildCropUI(f,im,url){
       const body={message:"crop "+newName,content:b64,branch:GH_BRANCH};
       if(overwrite)body.sha=f.sha;   // 同名覆盖：位置和链接都不变
       await gh("PUT",API+encPath(np),body);
-      freshPaths.add(np);
+      markFresh(np);
       if(np!==f.path&&names[f.path]){names[np]=names[f.path];saveNamesLocal();}
       let msg;
       if(!replace)msg="已另存为新图，就在原图旁边 ✅";
@@ -1161,13 +1188,22 @@ function buildCropUI(f,im,url){
   q("#cCancel").onclick=closeCrop;
   setRatio(0);
 }
-function reloadOne(e){
+async function openImg(f,url){
+  if(!isFresh(f.path)){window.open(url,"_blank");return;}
+  const w=window.open("","_blank");
+  toast("刚改过的图：这里打开的是最新版本（公开链接几分钟后才会更新）");
+  try{
+    const b=await fetchBlob(f),u=URL.createObjectURL(b);
+    if(w)w.location.href=u;else window.open(u,"_blank");
+  }catch(e){if(w)w.location.href=url;else window.open(url,"_blank");}
+}
+function reloadOne(e,single){
   if(e.audio){e.el.src=siteUrl(e.f.path)+"?r="+Date.now();}
-  else loadImg(e.f,e.el,true);
+  else loadImg(e.f,e.el,true,!!single);
 }
 function reloadAll(){
   if(!thumbs.length){toast("这里没有图片可以加载");return;}
-  thumbs.forEach(reloadOne);
+  thumbs.forEach(e=>reloadOne(e,false));
   toast(`正在重新加载 ${thumbs.length} 个…`);
 }
 
