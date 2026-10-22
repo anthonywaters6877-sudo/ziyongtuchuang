@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的小图床</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--p:#ff8fb8;--p2:#b79cff;--soft:#fff0f7;--text:#5b4a63}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#fff6fb;color:var(--text);padding-bottom:150px}
+header{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:18px 18px 22px;border-radius:0 0 26px 26px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 18px rgba(183,156,255,.45)}
+header h1{font-size:20px;letter-spacing:1px}
+button{cursor:pointer;border:none;border-radius:999px;padding:8px 15px;font-size:14px;transition:transform .1s}
+button:active{transform:scale(.94)}
+.b-main{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+.b-white{background:rgba(255,255,255,.3);color:#fff}
+.b-gray{background:#f1ebf5;color:var(--text)}
+.b-red{background:#ff7a8a;color:#fff}
+.b-mini{padding:5px 11px;font-size:12px}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.card{background:#fff;border-radius:22px;box-shadow:0 6px 18px rgba(255,143,184,.18);padding:16px;margin-bottom:16px}
+.card h2{font-size:15px;margin-bottom:10px}
+.row{display:flex;gap:8px;align-items:center}
+input[type=password],input[type=text]{flex:1;min-width:0;padding:10px 12px;border:2px solid #f3dcea;border-radius:14px;font-size:14px;outline:none;background:#fffafd}
+input:focus{border-color:var(--p2)}
+.tip{font-size:12px;color:#b3a2bb;margin-top:6px}
+#drop{border:2px dashed var(--p);border-radius:20px;padding:26px 10px;text-align:center;color:var(--p);cursor:pointer;background:var(--soft);font-size:15px}
+#drop.over{background:#ffe3f0}
+#target{font-size:13px;margin-bottom:8px;color:var(--p2)}
+/* 上传记录 */
+#qbox{margin-top:12px;display:none}
+#qhead{display:flex;justify-content:space-between;align-items:center;background:var(--soft);border-radius:14px;padding:10px 12px;cursor:pointer;font-size:13px}
+#qall{height:6px;background:#f3e6ee;border-radius:3px;overflow:hidden;margin-top:8px}
+#qall i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--p2));transition:width .2s}
+#qbody{display:none;margin-top:8px}
+#qbox.open #qbody{display:block}
+#qtools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+#qlist{max-height:240px;overflow-y:auto;border:1px solid #f6e3ee;border-radius:12px;padding:4px 10px}
+.qitem{padding:7px 0;border-bottom:1px dashed #f3dcea;font-size:12px}
+.qitem:last-child{border:none}
+.qitem.hide{display:none}
+.qline{display:flex;gap:6px;align-items:center}
+.qname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qst{flex-shrink:0}
+.qst.ok{color:#17a35c}.qst.fail{color:#e0405a}.qst.up{color:var(--p2)}
+.qbar{height:4px;background:#f3e6ee;border-radius:2px;margin-top:4px;overflow:hidden}
+.qbar i{display:block;height:100%;width:0;background:var(--p2)}
+/* 分类 */
+#tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;background:#fff;color:var(--text);box-shadow:0 3px 8px rgba(255,143,184,.2);padding:8px 14px}
+.tab.on{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+.tab.add{background:#f1ebf5}
+#bar2{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;gap:6px;flex-wrap:wrap}
+/* 图库 */
+#grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:600px){#grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+.file{background:#fff;border-radius:18px;box-shadow:0 5px 14px rgba(255,143,184,.2);padding:8px;position:relative;border:3px solid transparent}
+.file.sel{border-color:var(--p)}
+.thumb{height:120px;background:#fdf3f8;border-radius:13px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb img{max-width:100%;max-height:100%;object-fit:contain}
+.thumb audio{width:100%}
+.name{font-size:12px;margin:6px 2px 6px;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acts{display:flex;gap:5px}
+.acts button{flex:1;padding:6px 0;font-size:12px}
+.chk{position:absolute;left:12px;top:12px;width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid var(--p);display:none;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.managing .chk{display:flex}
+.managing .acts{display:none}
+.file.sel .chk{background:var(--p)}
+#mbar{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -4px 16px rgba(183,156,255,.3);padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));display:none;gap:6px;align-items:center;z-index:5;border-radius:20px 20px 0 0}
+.managing-on #mbar{display:flex}
+#mcount{flex:1;font-size:14px;white-space:nowrap}
+#mbar button{padding:8px 11px;font-size:13px;white-space:nowrap}
+#toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(91,74,99,.92);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:20;max-width:90%;text-align:center}
+#toast.show{opacity:1}
+.empty{grid-column:1/-1;text-align:center;color:#b3a2bb;padding:30px 0;font-size:14px}
+/* 输入框弹窗、检查结果 */
+#dlgMask{position:fixed;inset:0;background:rgba(91,74,99,.45);display:none;z-index:30;align-items:flex-start;justify-content:center;padding-top:18vh}
+#dlg{background:#fff;border-radius:22px;padding:18px;width:88%;max-width:420px}
+#dlg h3{font-size:15px;margin-bottom:10px;line-height:1.5}
+#dlg input{width:100%;flex:none}
+#dlg .dact{display:flex;gap:8px;margin-top:12px}
+#dlg .dact button{flex:1;padding:11px 8px}
+#stat{min-height:130px}
+.file.bad{border-color:#ff7a8a}
+.why{font-size:11px;color:#e0405a;margin:0 2px 6px;line-height:1.4}
+/* 重新加载 */
+.thumb{position:relative}
+.thfail{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;font-size:12px;color:#e0679a;cursor:pointer;text-align:center;line-height:1.6}
+.rl{position:absolute;right:12px;top:12px;width:30px;height:30px;padding:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 6px rgba(183,156,255,.5);font-size:15px;line-height:30px;z-index:2}
+.rl.ck{right:48px}
+.managing .rl{display:none}
+/* 名字、导出 */
+.alias{font-size:13px;font-weight:600;color:#e0679a;margin:7px 2px 0;cursor:pointer;word-break:break-all}
+.alias.none{color:#c9b8d0;font-weight:400}
+#mbar{flex-direction:column;align-items:stretch;gap:8px}
+.mrow{display:flex;gap:6px;align-items:center}
+.mrow.act button{flex:1}
+#sheet .lab{font-size:13px;color:var(--p2);margin:10px 0 6px}
+#sheet .chips{display:flex;flex-wrap:wrap}
+#sheet .chips.dis{opacity:.35;pointer-events:none}
+#sheet .chips button{display:inline-block;width:auto;margin:0 6px 6px 0;padding:8px 13px;font-size:13px;border-radius:999px}
+#sheet .chips button.on{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+#sheet textarea{width:100%;height:210px;border:2px solid #f3dcea;border-radius:14px;padding:10px;font-size:13px;outline:none;background:#fffafd;color:var(--text);resize:vertical;margin-bottom:6px;font-family:inherit}
+#sheet .actrow{display:flex;gap:8px;margin-top:10px}
+#sheet .actrow button{flex:1;margin:0;text-align:center;padding:12px 8px;font-size:14px}
+/* 用量统计 */
+#stat{padding:14px 16px}
+#stat .big{font-size:15px;margin-bottom:8px}
+#stat .big b{color:var(--p2);font-size:18px}
+#statbar{height:10px;background:#f3e6ee;border-radius:5px;overflow:hidden}
+#statbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--p),var(--p2));transition:width .3s}
+/* 移动弹窗 */
+#sheetMask{position:fixed;inset:0;background:rgba(91,74,99,.45);display:none;z-index:10;align-items:flex-end}
+#sheetMask.show{display:flex}
+#sheet{background:#fff;width:100%;max-height:70vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#sheet h3{font-size:16px;margin-bottom:12px}
+#sheet button{display:block;width:100%;text-align:left;margin-bottom:8px;border-radius:16px;padding:12px 16px;font-size:15px}
+/* 卡片美化 */
+.head{display:flex;align-items:center;gap:4px;margin:8px 2px 2px}
+.alias{flex:1;min-width:0;margin:0;font-size:14px}
+.tools{display:flex;gap:4px;flex:none}
+.rl,.rl.ck{position:static;width:28px;height:28px;line-height:28px;font-size:13px;background:#f6eefb;box-shadow:none;padding:0}
+.managing .tools{display:none}
+.name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:#b9a9c1;margin:0 2px 8px}
+.acts .b-red{background:#ffe6ec;color:#e0405a}
+.acts .b-gray{background:#f4eef8}
+.thumb{background:#fdf4f9;box-shadow:inset 0 0 0 1px #fbe3ef}
+.file{padding:9px}
+#tabs{position:sticky;top:0;z-index:4;background:rgba(255,246,251,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);margin:0 -16px 6px;padding:8px 16px}
+/* 修复：超长文件名把页面撑宽 */
+#grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:600px){#grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}}
+.file{min-width:0}
+.file>*{min-width:0;max-width:100%}
+/* 统一卡片大小 */
+.file{display:flex;flex-direction:column}
+.thumb{flex:none}
+.head{display:block;margin:8px 2px 2px}
+.alias{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.8em;line-height:1.4;font-size:13px;font-weight:600;margin:0;word-break:break-all}
+.alias.none{font-weight:400}
+.name{margin:0 2px 8px}
+.acts{margin-top:auto}
+.acts .more{flex:none;width:30px;padding:6px 0;font-size:15px;line-height:1}
+/* ⋯ 按钮放右上角，带边框，略微上移 */
+.file{padding-top:14px}
+.chk{top:20px;left:14px}
+.file>.more{position:absolute;top:-6px;right:6px;width:26px;height:26px;padding:0;border-radius:50%;background:#fff;border:1.5px solid #f3c6dc;box-shadow:0 2px 6px rgba(183,156,255,.45);color:var(--p2);font-size:15px;line-height:20px;z-index:2}
+.managing .more{display:none}
+/* 名字展开小箭头 */
+.head{display:flex;align-items:flex-start;gap:4px}
+.alias{flex:1;min-width:0}
+.alias.open{display:block;-webkit-line-clamp:unset;height:auto}
+.chevbtn{display:none;flex:none;width:22px;height:22px;margin-top:2px;padding:0;border-radius:50%;background:#f6eefb;align-items:center;justify-content:center}
+.chevbtn i{display:block;width:6px;height:6px;border-right:2px solid var(--p2);border-bottom:2px solid var(--p2);transform:rotate(45deg);margin-top:-2px}
+.chevbtn.up i{transform:rotate(-135deg);margin-top:2px}
+/* 小浮层菜单 */
+#popMask{position:fixed;inset:0;z-index:40}
+.pop{position:fixed;background:#fff;border:1.5px solid #f3c6dc;border-radius:16px;box-shadow:0 8px 24px rgba(91,74,99,.28);padding:6px;min-width:136px;z-index:41}
+.pop button{display:block;width:100%;text-align:left;background:none;border-radius:10px;padding:10px 12px;font-size:14px;color:var(--text);white-space:nowrap}
+.pop button:active{background:#f6eefb}
+/* 裁剪 */
+#cropMask{position:fixed;inset:0;background:#241a2e;z-index:50;display:flex;flex-direction:column;align-items:center;padding:14px 12px calc(14px + env(safe-area-inset-bottom,0px));color:#fff;overflow:auto;overscroll-behavior:contain}
+#cropMask h3{font-size:15px;margin:2px 0 8px;text-align:center}
+#cropMask .cnote{font-size:12px;color:#ffd9a8;margin-bottom:6px}
+#cropStage{position:relative;padding:18px;touch-action:none;user-select:none;-webkit-user-select:none;flex:none}
+#cropWrap{position:relative;background:#222}
+#cropWrap img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
+#cropWrap .dim{position:absolute;background:rgba(0,0,0,.55);pointer-events:none}
+#cropBox{position:absolute;border:2px solid #fff;touch-action:none;cursor:move;box-sizing:border-box}
+.ch{position:absolute;width:36px;height:36px;touch-action:none}
+.ch::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;background:#fff;border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.ch.nw{left:-18px;top:-18px}.ch.ne{right:-18px;top:-18px}.ch.sw{left:-18px;bottom:-18px}.ch.se{right:-18px;bottom:-18px}
+.ch.n{left:50%;top:-18px;margin-left:-18px}.ch.s{left:50%;bottom:-18px;margin-left:-18px}
+.ch.w{top:50%;left:-18px;margin-top:-18px}.ch.e{top:50%;right:-18px;margin-top:-18px}
+.ch.n::after,.ch.s::after{width:22px;height:6px;margin:-3px 0 0 -11px}
+.ch.w::after,.ch.e::after{width:6px;height:22px;margin:-11px 0 0 -3px}
+#cropMask.locked .ch.n,#cropMask.locked .ch.s,#cropMask.locked .ch.w,#cropMask.locked .ch.e{display:none}
+#cropInfo{font-size:12px;color:#d9c9e6;margin:2px 0 10px}
+.rchips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px}
+.rchips button{padding:6px 12px;font-size:13px;background:rgba(255,255,255,.15);color:#fff}
+.rchips button.on{background:linear-gradient(135deg,var(--p),var(--p2))}
+.cact{display:flex;gap:8px;width:100%;max-width:440px}
+.cact button{flex:1;padding:12px 6px;font-size:14px}
+.ctip{font-size:12px;color:#cdbbdb;margin-top:10px;text-align:center;max-width:440px}
+#cropMask.busy button{opacity:.5;pointer-events:none}
+/* 未命名高亮 */
+.file.unnamed{background:var(--hl-bg,#fff3d6);border-color:var(--hl-border,#ffc247);box-shadow:0 0 0 2px var(--hl-border,#ffc247),0 5px 14px rgba(0,0,0,.08)}
+.file.unnamed .thumb{background:var(--hl-thumb,#fff8e6);box-shadow:none}
+.file.unnamed .alias{color:var(--hl-text,#e08a00);font-weight:700}
+#hlTools{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 12px;font-size:13px}
+#hlTools.show{display:flex}
+#hlSw{display:flex;gap:6px;flex-wrap:wrap}
+.sw{width:26px;height:26px;padding:0;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px #e6d5ee}
+.sw.on{box-shadow:0 0 0 2.5px var(--text)}
+.hlcustom{position:relative;width:26px;height:26px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 1.5px #e6d5ee;background:conic-gradient(#ff5c5c,#ffd24d,#7ee05a,#4dd2ff,#6a6aff,#d36bff,#ff5c5c)}
+.hlcustom input{position:absolute;left:-10px;top:-10px;width:50px;height:50px;opacity:0;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐰 我的小图床</h1>
+  <button class="b-white" onclick="loadAll()">🔄 刷新</button>
+</header>
+<main>
+  <div class="card">
+    <h2>🔑 Token 设置</h2>
+    <div class="row">
+      <input type="password" id="token" placeholder="粘贴 GitHub Token（ghp_ 开头）">
+      <button class="b-main" onclick="saveToken()">保存</button>
+    </div>
+    <div class="tip">Token 只保存在你自己的浏览器里，保存一次，下次不用再填。</div>
+  </div>
+
+  <div class="card">
+    <h2>⬆️ 上传文件</h2>
+    <div id="target"></div>
+    <div id="drop">🌸 点击选择文件，或拖到这里（可多选）<div class="tip">图片：jpg png gif webp svg bmp ico　音频：mp3 wav m4a ogg flac aac</div></div>
+    <input type="file" id="picker" multiple hidden accept="image/*,audio/*,.heic,.heif,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.mp3,.wav,.m4a,.ogg,.flac,.aac">
+    <div id="qbox">
+      <div id="qhead" onclick="$('qbox').classList.toggle('open')">
+        <span id="qsum"></span><span id="qarrow">▼ 展开</span>
+      </div>
+      <div id="qall"><i></i></div>
+      <div id="qbody">
+        <div id="qtools">
+          <button class="b-gray b-mini" onclick="retryAll()">🔁 重试全部失败</button>
+          <button class="b-gray b-mini" id="qfilter" onclick="toggleFilter()">只看失败的</button>
+          <button class="b-gray b-mini" onclick="clearOk()">🧹 清除成功记录</button>
+        </div>
+        <div id="qlist"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:16px;margin:4px 4px 10px">📁 我的图库</h2>
+  <div class="card" id="stat"><div class="tip">📊 用量统计加载中…</div></div>
+  <div id="tabs"></div>
+  <div id="bar2">
+    <span id="count"></span>
+    <span>
+      <button class="b-gray b-mini" onclick="reloadAll()">🔄 重新加载图片</button>
+      <button class="b-gray b-mini" onclick="checkAll()">🩺 检查全部</button>
+      <button class="b-gray b-mini" id="hlBtn" onclick="toggleHl()">🔎 标出未命名</button>
+      <button class="b-gray b-mini" id="manageBtn" onclick="toggleManage()">☑️ 批量管理</button>
+      <button class="b-red b-mini" id="delCatBtn" onclick="delCat()" style="display:none">🗑️ 删除此分类</button>
+    </span>
+  </div>
+  <div id="hlTools"><span>标记颜色：</span><span id="hlSw"></span><label class="hlcustom" title="自己选颜色"><input type="color" id="hlPick" value="#ffc247"></label><button class="b-gray b-mini" onclick="jumpUnnamed()">⏭ 下一张未命名</button></div>
+  <div id="grid"></div>
+</main>
+
+<div id="mbar">
+  <div class="mrow">
+    <span id="mcount">已选 0</span>
+    <button class="b-gray" onclick="selAll()">全选</button>
+    <button class="b-gray" onclick="toggleManage()">完成</button>
+  </div>
+  <div class="mrow act">
+    <button class="b-main" onclick="openMove()">📦 移动</button>
+    <button class="b-main" onclick="openExport()">📤 导出</button>
+    <button class="b-main" onclick="checkSelected()">🩺 检查</button>
+    <button class="b-red" onclick="delSelected()">🗑️ 删除</button>
+  </div>
+</div>
+
+<div id="dlgMask"><div id="dlg"><h3 id="dlgTitle"></h3><input type="text" id="dlgInput" autocomplete="off"><div class="dact"><button class="b-main" id="dlgOk">保存</button><button class="b-gray" id="dlgCancel">取消</button></div></div></div>
+<div id="sheetMask" onclick="closeSheet()"><div id="sheet" onclick="event.stopPropagation()"></div></div>
+<div id="toast"></div>
+
+<script>
+// ====== 只需要改这里 ======
+const GH_USER = "anthonywaters6877-sudo";
+const GH_REPO = "ziyongtuchuang";
+const GH_BRANCH = "main";
+const BASE = "images";   // 所有图片都放在仓库的这个文件夹里，仓库首页就不会乱
+// ==========================
+
+const IMG = ["jpg","jpeg","png","gif","webp","svg","bmp","ico"];
+const AUD = ["mp3","wav","m4a","ogg","flac","aac"];
+const OK_EXT = IMG.concat(AUD);
+const REPO_API = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/`;
+const API = REPO_API + "contents/";
+const GIT = REPO_API + "git/";
+const $ = id => document.getElementById(id);
+const ext = n => (n.split(".").pop() || "").toLowerCase();
+const encPath = p => p.split("/").map(encodeURIComponent).join("/");
+const siteUrl = path => `https://${GH_USER}.github.io/${GH_REPO}/${encPath(path)}`;
+const disp = n => n.replace(/^\d{13,}_/, "");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const dirOfPath = p => p.split("/").slice(0,-1).join("/");
+const inBase = d => d === BASE || d.startsWith(BASE + "/");
+const catName = d => d === BASE ? "未分类" : d.slice(BASE.length + 1);
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+function toast(msg){
+  const t=$("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2400);
+}
+function getToken(){return lsGet("gh_token")||"";}
+function saveToken(){
+  const v=$("token").value.trim();
+  if(!v){toast("请先粘贴 Token");return;}
+  lsSet("gh_token",v);toast("Token 已保存 ✅");loadAll();
+}
+function headers(){return {"Authorization":"token "+getToken(),"Accept":"application/vnd.github+json","Content-Type":"application/json"};}
+async function gh(method,url,body){
+  const r=await fetch(url,{method,headers:headers(),body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.message||("错误码 "+r.status));
+  return j;
+}
+
+/* ================= 上传 ================= */
+$("drop").onclick=()=>$("picker").click();
+$("picker").onchange=e=>{addFiles(e.target.files);e.target.value="";};
+$("drop").ondragover=e=>{e.preventDefault();$("drop").classList.add("over");};
+$("drop").ondragleave=()=>$("drop").classList.remove("over");
+$("drop").ondrop=e=>{e.preventDefault();$("drop").classList.remove("over");addFiles(e.dataTransfer.files);};
+
+let tasks=[],seq=0,running=false,lastTs=0,filterFail=false;
+const upDir=()=>inBase(curDir)?curDir:BASE;
+
+function addFiles(list){
+  if(!getToken()){toast("请先保存 Token");return;}
+  let n=0;
+  for(const f of Array.from(list)){
+    if(!OK_EXT.concat(["heic","heif"]).includes(ext(f.name))){toast("不支持的格式："+f.name);continue;}
+    const safe=f.name.replace(/[^\w.\-\u4e00-\u9fa5]/g,"_");
+    let ts=Date.now();if(ts<=lastTs)ts=lastTs+1;lastTs=ts;
+    const t={id:++seq,file:f,dir:upDir(),name:ts+"_"+safe,show:safe,status:"wait",err:""};
+    makeTaskEl(t);
+    tasks.push(t);$("qlist").prepend(t.el);n++;
+  }
+  if(n){$("qbox").style.display="block";setTask(tasks[tasks.length-1],"wait");pump();}
+}
+function makeTaskEl(t){
+  const el=document.createElement("div");el.className="qitem";
+  el.innerHTML=`<div class="qline"><span class="qname"></span><span class="qst"></span><button class="b-red b-mini qretry" style="display:none">重新上传</button></div><div class="qbar"><i></i></div>`;
+  el.querySelector(".qname").textContent=(t.dir===BASE?"":catName(t.dir)+" / ")+t.show;
+  el.querySelector(".qretry").onclick=()=>{setTask(t,"wait");pump();};
+  t.el=el;t.bar=el.querySelector(".qbar i");
+}
+function setTask(t,s,err){
+  t.status=s;t.err=err||"";
+  const st=t.el.querySelector(".qst"),rb=t.el.querySelector(".qretry");
+  st.textContent={wait:"⏳ 排队中",up:"⬆️ 上传中",ok:"✅ 成功",fail:"❌ "+t.err}[s];
+  st.className="qst "+s;
+  rb.style.display=s==="fail"?"inline-block":"none";
+  t.el.classList.toggle("hide",filterFail&&s!=="fail");
+  updateQ();
+}
+function updateQ(){
+  const c={wait:0,up:0,ok:0,fail:0};tasks.forEach(t=>c[t.status]++);
+  const total=tasks.length;
+  $("qsum").textContent=`共 ${total} 张　✅ ${c.ok}　❌ ${c.fail}　⏳ ${c.wait+c.up}`;
+  $("qall").firstElementChild.style.width=(total?(c.ok+c.fail)/total*100:0)+"%";
+  $("qarrow").textContent=$("qbox").classList.contains("open")?"▲ 收起":"▼ 展开";
+  if(!total)$("qbox").style.display="none";
+}
+new MutationObserver(updateQ).observe($("qbox"),{attributes:true,attributeFilter:["class"]});
+
+function toggleFilter(){
+  filterFail=!filterFail;
+  $("qfilter").textContent=filterFail?"显示全部":"只看失败的";
+  tasks.forEach(t=>t.el.classList.toggle("hide",filterFail&&t.status!=="fail"));
+}
+function retryAll(){
+  const f=tasks.filter(t=>t.status==="fail");
+  if(!f.length){toast("没有失败的 🎉");return;}
+  f.forEach(t=>setTask(t,"wait"));pump();
+}
+function clearOk(){
+  tasks=tasks.filter(t=>{if(t.status==="ok"){t.el.remove();return false;}return true;});
+  updateQ();
+}
+async function pump(){
+  if(running)return;running=true;let did=false;
+  while(true){
+    const t=tasks.find(x=>x.status==="wait");
+    if(!t)break;
+    await doUpload(t);did=true;
+  }
+  running=false;
+  if(did){
+    const f=tasks.filter(t=>t.status==="fail").length;
+    toast(f?`上传完成，有 ${f} 张失败，可点重新上传`:"全部上传成功 🎉");
+    loadAll();
+  }
+}
+function toBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(",")[1]);
+    r.onerror=()=>rej(new Error("读取文件失败"));
+    r.readAsDataURL(file);
+  });
+}
+function put(t,b64){
+  const path=t.dir+"/"+t.name;
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest();
+    x.open("PUT",API+encPath(path));
+    const h=headers();for(const k in h)x.setRequestHeader(k,h[k]);
+    x.upload.onprogress=e=>{if(e.lengthComputable)t.bar.style.width=(e.loaded/e.total*100)+"%";};
+    x.onload=()=>{
+      if(x.status>=200&&x.status<300)res();
+      else{let m="";try{m=JSON.parse(x.responseText).message}catch(e){}rej(new Error(m||("错误码 "+x.status)));}
+    };
+    x.onerror=()=>rej(new Error("网络错误"));
+    x.ontimeout=()=>rej(new Error("超时"));
+    x.timeout=120000;
+    x.send(JSON.stringify({message:"upload "+t.name,content:b64,branch:GH_BRANCH}));
+  });
+}
+async function doUpload(t){
+  setTask(t,"up");t.bar.style.width="0";
+  try{
+    let src=t.file;
+    const head=new Uint8Array(await src.slice(0,16).arrayBuffer());
+    if(sniff(head)==="HEIC"){
+      t.el.querySelector(".qst").textContent="🔄 转换 HEIC…";
+      src=await heicToPng(src);
+      t.name=t.name.replace(/\.[^.]+$/,"")+".png";
+    }
+    const b64=await toBase64(src);
+    try{await put(t,b64);}
+    catch(e){await sleep(1200);t.bar.style.width="0";await put(t,b64);}
+    t.bar.style.width="100%";setTask(t,"ok");
+  }catch(e){setTask(t,"fail",e.message);}
+}
+
+/* ================= 分类 & 图库 ================= */
+let tabs=[],curDir=BASE,items=[],selected=new Set(),managing=false;
+
+function localCats(){try{return JSON.parse(lsGet("gh_local_cats")||"[]")}catch(e){return []}}
+function saveLocalCats(a){lsSet("gh_local_cats",JSON.stringify(a))}
+
+async function ghList(dir){
+  const r=await fetch(API+(dir?encPath(dir):"")+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:headers(),cache:"no-store"});
+  if(r.status===404)return [];
+  if(!r.ok)throw new Error(r.status===401?"Token 不对或已过期":"错误码 "+r.status);
+  const j=await r.json();
+  return Array.isArray(j)?j:[];
+}
+
+async function loadAll(){
+  const grid=$("grid");
+  renderTarget();
+  if(!getToken()){grid.innerHTML='<div class="empty">先在上面保存 Token，图库才会显示～</div>';$("tabs").innerHTML="";$("count").textContent="";return;}
+  grid.innerHTML='<div class="empty">加载中…🌸</div>';
+  try{
+    const root=await ghList("");
+    const base=await ghList(BASE);
+    const baseDirs=base.filter(f=>f.type==="dir").map(f=>f.name);
+    const cats=[...new Set([...baseDirs,...localCats()])];
+    const legacyFiles=root.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)));
+    const legacyDirs=root.filter(f=>f.type==="dir"&&!f.name.startsWith(".")&&f.name!==BASE).map(f=>f.name);
+    tabs=[{label:"🌷 未分类",dir:BASE}];
+    cats.forEach(c=>tabs.push({label:"📁 "+c,dir:BASE+"/"+c}));
+    if(legacyFiles.length)tabs.push({label:"📦 旧文件（仓库根目录）",dir:""});
+    legacyDirs.forEach(d=>tabs.push({label:"📦 旧："+d,dir:d}));
+    if(!tabs.some(t=>t.dir===curDir))curDir=BASE;
+    const list=curDir===""?root:curDir===BASE?base:await ghList(curDir);
+    items=list.filter(f=>f.type==="file"&&OK_EXT.includes(ext(f.name)))
+      .map(f=>({name:f.name,path:f.path,sha:f.sha,size:f.size||0,thumb:f.download_url}))
+      .sort((a,b)=>b.name.localeCompare(a.name));
+    selected=new Set();
+    renderTarget();renderTabs();renderGrid();
+    loadStats();autoRestoreNames();
+  }catch(err){
+    grid.innerHTML='<div class="empty" style="color:#e0405a">加载失败：'+err.message+'</div>';
+  }
+}
+function renderTarget(){$("target").textContent="📂 当前上传到：【"+catName(upDir())+"】（先在下面点好分类再上传）";}
+
+function renderTabs(){
+  const box=$("tabs");box.innerHTML="";
+  tabs.forEach(t=>{
+    const b=document.createElement("button");b.className="tab"+(t.dir===curDir?" on":"");
+    b.textContent=t.label+(stats?" · "+fmtSize(stats.byDir[t.dir]||0):"");
+    b.onclick=()=>{curDir=t.dir;managing=false;selected=new Set();applyManage();loadAll();};
+    box.appendChild(b);
+  });
+  const add=document.createElement("button");add.className="tab add";add.textContent="＋ 新建分类";add.onclick=()=>addCat(false);box.appendChild(add);
+  $("delCatBtn").style.display=(curDir!==""&&curDir!==BASE)?"inline-block":"none";
+}
+async function askCatName(){
+  let n=await askText("给新分类起个名字","","比如：头像、壁纸、表情包");
+  if(n===null)return "";
+  n=n.trim().replace(/[\\\/\s]+/g,"_").replace(/^\.+/,"");
+  if(!n){toast("名字不能为空");return "";}
+  return n;
+}
+async function addCat(){
+  const n=await askCatName();if(!n)return null;
+  const l=localCats();if(!l.includes(n)){l.push(n);saveLocalCats(l);}
+  curDir=BASE+"/"+n;toast("已创建分类："+n);loadAll();return n;
+}
+
+function renderGrid(){
+  const grid=$("grid");grid.innerHTML="";thumbs=[];arrows=[];
+  $("count").textContent=`共 ${items.length} 个文件 · ${fmtSize(items.reduce((a,f)=>a+f.size,0))}`;
+  if(!items.length){grid.innerHTML='<div class="empty">这里还是空的，上传点东西吧～🍃</div>';applyManage();return;}
+  items.forEach(f=>{
+    const url=siteUrl(f.path);
+    const card=document.createElement("div");card.className="file"+(selected.has(f.path)?" sel":"")+(hlUnnamed&&!names[f.path]?" unnamed":"");
+    const chk=document.createElement("div");chk.className="chk";chk.textContent="✓";
+    const th=document.createElement("div");th.className="thumb";
+    const entry={f,el:null,audio:false};
+    if(AUD.includes(ext(f.name))){const a=document.createElement("audio");a.controls=true;a.src=url;a.preload="none";th.appendChild(a);entry.el=a;entry.audio=true;}
+    else{
+      const im=document.createElement("img");im.loading="lazy";th.appendChild(im);
+      const fb=document.createElement("div");fb.className="thfail";fb.innerHTML="😢 加载失败<br>点这里重试";
+      fb.onclick=e=>{e.stopPropagation();loadImg(f,im,true);};th.appendChild(fb);
+      entry.el=im;loadImg(f,im,false);
+    }
+    thumbs.push(entry);
+    const rl=document.createElement("button");rl.className="rl";rl.textContent="🔄";rl.title="重新加载";
+    rl.onclick=e=>{e.stopPropagation();reloadOne(entry);toast("重新加载中…");};
+    const nm=document.createElement("div");nm.className="name";nm.textContent=disp(f.name);
+    const acts=document.createElement("div");acts.className="acts";
+    const b1=document.createElement("button");b1.className="b-main";b1.textContent="复制";b1.onclick=()=>copy(url);
+    const b2=document.createElement("button");b2.className="b-gray";b2.textContent="打开";b2.onclick=()=>window.open(url,"_blank");
+    const b3=document.createElement("button");b3.className="b-red";b3.textContent="删除";b3.onclick=()=>delOne(f);
+    acts.append(b1,b2,b3);
+    const al=document.createElement("div");
+    al.className="alias"+(names[f.path]?"":" none");
+    al.textContent=names[f.path]?"🏷️ "+names[f.path]:"🏷️ 点我命名";
+    al.onclick=()=>{if(managing)return;renameImg(f,al);};
+    const head=document.createElement("div");head.className="head";
+    const tools=document.createElement("div");tools.className="tools";
+    const cb=document.createElement("button");cb.className="chevbtn";cb.title="展开/收起全名";cb.innerHTML="<i></i>";
+    cb.onclick=e=>{e.stopPropagation();al.classList.toggle("open");cb.classList.toggle("up");};
+    head.append(al,cb);arrows.push(al);
+    card.append(chk,th,head,nm);
+    const pr=probeRes[f.path];
+    if(pr&&!pr.ok){card.classList.add("bad");const w=document.createElement("div");w.className="why";w.textContent="⚠️ "+pr.msg;card.append(w);}
+    const more=document.createElement("button");more.className="b-gray more";more.textContent="⋯";more.title="更多";
+    more.onclick=e=>{e.stopPropagation();openMore(f,entry,al,more);};
+    card.append(acts);
+    card.append(more);
+    card.onclick=()=>{
+      if(!managing)return;
+      if(selected.has(f.path))selected.delete(f.path);else selected.add(f.path);
+      card.classList.toggle("sel",selected.has(f.path));updateM();
+    };
+    grid.appendChild(card);
+  });
+  applyManage();
+  requestAnimationFrame(()=>arrows.forEach(a=>refreshArrow(a)));
+  updateHlBtn();
+}
+async function copy(text,msg){
+  msg=msg||"链接已复制 ✅";
+  try{await navigator.clipboard.writeText(text);toast(msg);}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");toast(msg);}catch(e2){toast("复制失败，请长按文字手动复制");}
+    ta.remove();
+  }
+}
+
+/* ================= 图片名字 ================= */
+const NAMES_PATH=BASE+"/_names.json";
+let names=(()=>{try{return JSON.parse(lsGet("gh_names")||"{}")}catch(e){return {}}})();
+function saveNamesLocal(){lsSet("gh_names",JSON.stringify(names));}
+function dropNames(paths){paths.forEach(p=>delete names[p]);saveNamesLocal();}
+function remapNames(pairs){pairs.forEach(([o,n])=>{if(names[o]!==undefined){names[n]=names[o];delete names[o];}});saveNamesLocal();}
+function askText(title,initial,hint){
+  return new Promise(res=>{
+    const y=window.scrollY,m=$("dlgMask"),inp=$("dlgInput");
+    $("dlgTitle").textContent=title;inp.value=initial||"";inp.placeholder=hint||"";
+    m.style.display="flex";
+    const close=v=>{
+      m.style.display="none";$("dlgOk").onclick=null;$("dlgCancel").onclick=null;inp.onkeydown=null;
+      [0,60,250].forEach(t=>setTimeout(()=>window.scrollTo(0,y),t));
+      res(v);
+    };
+    $("dlgOk").onclick=()=>close(inp.value);
+    $("dlgCancel").onclick=()=>close(null);
+    inp.onkeydown=e=>{if(e.key==="Enter")close(inp.value);};
+    setTimeout(()=>inp.focus({preventScroll:true}),50);
+  });
+}
+async function renameImg(f,el){
+  const v=await askText("给这张图起个名字（留空保存 = 清除名字）",names[f.path]||"","比如：开心、吃番茄");
+  if(v===null)return;
+  const n=v.trim();
+  if(n)names[f.path]=n;else delete names[f.path];
+  saveNamesLocal();
+  el.className="alias"+(n?"":" none");
+  el.textContent=n?"🏷️ "+n:"🏷️ 点我命名";refreshArrow(el);
+  const cardEl=el.closest(".file");if(cardEl)cardEl.classList.toggle("unnamed",hlUnnamed&&!n);
+  updateHlBtn();
+}
+const b64enc=t=>btoa(unescape(encodeURIComponent(t)));
+const b64dec=t=>decodeURIComponent(escape(atob(t.replace(/\n/g,""))));
+async function backupNames(){
+  try{
+    let sha;
+    const r=await fetch(API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:headers(),cache:"no-store"});
+    if(r.ok)sha=(await r.json()).sha;
+    await gh("PUT",API+encPath(NAMES_PATH),{message:"backup names",content:b64enc(JSON.stringify(names,null,1)),branch:GH_BRANCH,sha});
+    toast("图片名字已备份到仓库 ☁️");
+  }catch(e){toast("备份失败："+e.message);}
+}
+async function restoreNames(){
+  if(!confirm("用仓库里备份的名字，覆盖当前浏览器里的名字吗？"))return;
+  try{
+    const j=await gh("GET",API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now());
+    names=JSON.parse(b64dec(j.content));saveNamesLocal();
+    toast("已恢复图片名字 ✅");renderGrid();
+  }catch(e){toast("恢复失败："+(e.message==="Not Found"?"仓库里还没有备份":e.message));}
+}
+async function autoRestoreNames(){
+  if(lsGet("gh_names")!==null)return;
+  try{
+    const j=await gh("GET",API+encPath(NAMES_PATH)+"?ref="+GH_BRANCH+"&t="+Date.now());
+    names=JSON.parse(b64dec(j.content));saveNamesLocal();renderGrid();
+  }catch(e){lsSet("gh_names","{}");}
+}
+
+/* ================= 导出 ================= */
+const EXP_SYMS=[["","不加符号"],["：","中文冒号 ："],[":","英文冒号 :"],["，","中文逗号 ，"],[",","英文逗号 ,"]];
+const EXP_FMTS=[["box","📋 文字框"],["txt","📄 TXT"],["json","🧾 JSON"],["csv","📊 CSV"],["docx","📝 DOCX"]];
+let exp={fmt:lsGet("gh_exp_fmt")||"box",sym:lsGet("gh_exp_sym")===null?"：":lsGet("gh_exp_sym"),list:[]};
+
+function openExport(){
+  const list=items.filter(f=>selected.has(f.path)).sort((a,b)=>a.name.localeCompare(b.name));
+  if(!list.length){toast("先点选要导出的图片");return;}
+  exp.list=list;renderExport();
+  $("sheetMask").classList.add("show");
+}
+function setExp(k,v){exp[k]=v;lsSet("gh_exp_"+k,v);renderExport();}
+function csvCell(v){return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function genExport(){
+  const nm=x=>names[x.path]||"";
+  if(exp.fmt==="json")return JSON.stringify(exp.list.map(x=>({name:nm(x),url:siteUrl(x.path)})),null,2);
+  if(exp.fmt==="csv")return "名称,链接\n"+exp.list.map(x=>csvCell(nm(x))+","+csvCell(siteUrl(x.path))).join("\n");
+  return exp.list.map(x=>{const n=nm(x),u=siteUrl(x.path);return n?n+exp.sym+u:u;}).join("\n");
+}
+function renderExport(){
+  const symOn=["box","txt","docx"].includes(exp.fmt);
+  const chip=(on,fn,label)=>`<button class="${on?"on":"b-gray"}" onclick="${fn}">${label}</button>`;
+  $("sheet").innerHTML=`<h3>📤 导出 ${exp.list.length} 张</h3>
+  <div class="lab">① 导出方式</div>
+  <div class="chips">${EXP_FMTS.map(([k,l])=>chip(k===exp.fmt,`setExp('fmt','${k}')`,l)).join("")}</div>
+  <div class="lab">② 名字和链接之间的符号${symOn?"":"（JSON/CSV 不用选）"}</div>
+  <div class="chips ${symOn?"":"dis"}">${EXP_SYMS.map(([k,l])=>chip(k===exp.sym,`setExp('sym','${k}')`,l)).join("")}</div>
+  <div class="lab">③ 内容（可以直接修改）</div>
+  <textarea id="expText"></textarea>
+  <div class="tip">没命名的图片只导出纯链接。切换上面的选项会重新生成内容，之前手改的会丢。</div>
+  <div class="actrow"><button class="b-main" onclick="expCopy()">📋 一键复制</button>${exp.fmt!=="box"?'<button class="b-main" onclick="expDownload()">💾 下载文件</button>':""}<button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
+  $("expText").value=genExport();
+}
+function expCopy(){copy($("expText").value,"已复制 ✅");}
+function saveBlob(blob,filename){
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function expDownload(){
+  const text=$("expText").value;
+  const d=new Date(),pad=n=>String(n).padStart(2,"0");
+  const base="图床导出_"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"_"+pad(d.getHours())+pad(d.getMinutes());
+  if(exp.fmt==="txt")saveBlob(new Blob([text],{type:"text/plain;charset=utf-8"}),base+".txt");
+  else if(exp.fmt==="json")saveBlob(new Blob([text],{type:"application/json;charset=utf-8"}),base+".json");
+  else if(exp.fmt==="csv")saveBlob(new Blob(["\uFEFF"+text],{type:"text/csv;charset=utf-8"}),base+".csv");
+  else if(exp.fmt==="docx")saveBlob(makeDocx(text.split(/\r?\n/)),base+".docx");
+  toast("已生成文件，请看浏览器的下载提示 💾");
+}
+
+/* 手写一个最简单的 docx（不依赖任何外部库） */
+const crcTable=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=crcTable[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function makeZip(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const u16=n=>[n&255,(n>>>8)&255],u32=n=>[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255];
+  files.forEach(f=>{
+    const nm=enc.encode(f.name),data=enc.encode(f.text),crc=crc32(data),sz=data.length;
+    const lh=new Uint8Array([0x50,0x4b,3,4,20,0,0,0,0,0,0,0,0x21,0,...u32(crc),...u32(sz),...u32(sz),...u16(nm.length),0,0]);
+    parts.push(lh,nm,data);
+    cen.push(new Uint8Array([0x50,0x4b,1,2,20,0,20,0,0,0,0,0,0,0,0x21,0,...u32(crc),...u32(sz),...u32(sz),...u16(nm.length),0,0,0,0,0,0,0,0,0,0,0,0,...u32(off)]),nm);
+    off+=lh.length+nm.length+data.length;
+  });
+  const cenSize=cen.reduce((a,b)=>a+b.length,0);
+  const end=new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cenSize),...u32(off),0,0]);
+  return new Blob([...parts,...cen,end],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+}
+function makeDocx(lines){
+  const esc=t=>t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const head='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const paras=lines.map(l=>l?`<w:p><w:r><w:t xml:space="preserve">${esc(l)}</w:t></w:r></w:p>`:"<w:p/>").join("");
+  return makeZip([
+    {name:"[Content_Types].xml",text:head+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'},
+    {name:"_rels/.rels",text:head+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'},
+    {name:"word/document.xml",text:head+'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+paras+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/></w:sectPr></w:body></w:document>'}
+  ]);
+}
+
+/* ================= 用量统计 ================= */
+const LIMIT=1024*1024*1024; // GitHub 建议仓库不超过 1GB
+let stats=null;
+function fmtSize(b){
+  if(b<1024)return b+" B";
+  if(b<1024*1024)return (b/1024).toFixed(1)+" KB";
+  if(b<LIMIT)return (b/1024/1024).toFixed(1)+" MB";
+  return (b/LIMIT).toFixed(2)+" GB";
+}
+async function loadStats(){
+  try{
+    const j=await gh("GET",GIT+"trees/"+GH_BRANCH+"?recursive=1&t="+Date.now());
+    const st={byDir:{},total:0,count:0,truncated:!!j.truncated};
+    (j.tree||[]).forEach(n=>{
+      if(n.type!=="blob"||!OK_EXT.includes(ext(n.path)))return;
+      const d=dirOfPath(n.path);
+      st.byDir[d]=(st.byDir[d]||0)+(n.size||0);
+      st.total+=n.size||0;st.count++;
+    });
+    stats=st;renderTabs();renderStat();
+  }catch(e){
+    $("stat").innerHTML='<div class="tip">📊 用量统计加载失败：'+e.message+'</div>';
+  }
+}
+function renderStat(){
+  if(!stats)return;
+  const pct=Math.min(100,stats.total/LIMIT*100);
+  const color=pct>90?"#ff5c6c":pct>70?"#ffb44c":"";
+  $("stat").innerHTML=`<div class="big">📊 图床总用量：<b>${fmtSize(stats.total)}</b> / 建议上限 1 GB（${pct.toFixed(1)}%）</div>
+  <div id="statbar"><i style="width:${pct}%;${color?"background:"+color:""}"></i></div>
+  <div class="tip">共 ${stats.count} 个图片/音频文件。上面每个分类标签后面的数字是该分类的大小。${stats.truncated?"（文件太多，统计可能不完整）":""}<br>提示：删掉的文件还会留在 GitHub 的历史记录里，仓库真实占用可能比这里大一点。</div>
+  <div class="tip" id="pstat">🌐 网站发布状态：查询中…</div>
+  <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+    <button class="b-gray b-mini" onclick="rebuildPages()">🔁 重新发布网站</button>
+    <button class="b-gray b-mini" onclick="cleanHistory()">🧹 清理历史记录</button>
+    <button class="b-gray b-mini" onclick="backupNames()">☁️ 备份图片名字</button>
+    <button class="b-gray b-mini" onclick="restoreNames()">⬇️ 恢复图片名字</button></div>`;
+  loadPagesStatus();
+}
+
+/* ================= 清理历史 ================= */
+async function cleanHistory(){
+  if(running){toast("还在上传中，等传完再清理");return;}
+  if(!confirm("清理历史记录会把仓库的所有历史压成一条。\n\n✅ 现在的图片、分类、链接都不会变\n⚠️ 之前删除的图片会彻底回收，再也找不回来\n⚠️ 这个操作不能撤销\n\n确定继续吗？"))return;
+  if(!confirm("再确认一次：真的要清理历史记录吗？"))return;
+  try{
+    toast("清理中…请稍等");
+    const ref=await gh("GET",GIT+"ref/heads/"+GH_BRANCH+"?t="+Date.now());
+    const head=ref.object.sha;
+    const commit=await gh("GET",GIT+"commits/"+head);
+    const nc=await gh("POST",GIT+"commits",{message:"clean history",tree:commit.tree.sha,parents:[]});
+    await gh("PATCH",GIT+"refs/heads/"+GH_BRANCH,{sha:nc.sha,force:true});
+    toast("历史记录已清理 ✅ GitHub 回收空间需要一点时间");
+  }catch(e){toast("清理失败："+e.message);}
+}
+
+/* ================= 检查、修复、清理有问题的图片 ================= */
+let probeRes={};
+async function loadPagesStatus(){
+  const el=$("pstat");if(!el)return;
+  try{
+    const j=await gh("GET",REPO_API+"pages/builds/latest");
+    const map={built:"✅ 已发布",building:"⏳ 发布中",queued:"⏳ 排队中",errored:"❌ 出错"};
+    const t=new Date(j.updated_at||j.created_at).toLocaleString();
+    el.textContent="🌐 网站发布状态："+(map[j.status]||j.status)+(j.error&&j.error.message?"："+j.error.message:"")+"（"+t+"）";
+  }catch(e){el.textContent="🌐 网站发布状态：查不到（"+e.message+"）";}
+}
+async function rebuildPages(){
+  try{
+    await gh("POST",REPO_API+"pages/builds");
+    toast("已通知 GitHub 重新发布网站，约 1～5 分钟 🔁");
+    setTimeout(loadPagesStatus,4000);
+  }catch(e){toast("重新发布失败："+e.message);}
+}
+function imgTest(url,ms){
+  return new Promise(res=>{
+    const im=new Image();let done=false;
+    const fin=ok=>{if(!done){done=true;res(ok);}};
+    im.onload=()=>fin(im.naturalWidth>0);im.onerror=()=>fin(false);
+    setTimeout(()=>fin(false),ms||20000);im.src=url;
+  });
+}
+function sniff(u8){
+  const a=Array.from(u8.slice(0,16)),s=String.fromCharCode(...a);
+  if(s.startsWith("GIF8"))return "GIF";
+  if(a[0]===0x89&&s.slice(1,4)==="PNG")return "PNG";
+  if(a[0]===0xFF&&a[1]===0xD8)return "JPEG";
+  if(s.startsWith("RIFF")&&s.slice(8,12)==="WEBP")return "WEBP";
+  if(s.slice(4,8)==="ftyp"){const b=s.slice(8,12);return /avi[fs]/.test(b)?"AVIF":/hei|mif1|msf1/.test(b)?"HEIC":"视频类";}
+  if(s.startsWith("BM"))return "BMP";
+  if(s.startsWith("<svg")||s.startsWith("<?xml"))return "SVG";
+  return "未知";
+}
+let heicLoading=null;
+function loadHeicLib(){
+  if(window.heic2any)return Promise.resolve();
+  if(heicLoading)return heicLoading;
+  const urls=[
+    "https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js",
+    "https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js",
+    "https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js"
+  ];
+  const p=(async()=>{
+    for(const u of urls){
+      try{
+        await new Promise((res,rej)=>{
+          const sc=document.createElement("script");sc.src=u;sc.onload=res;sc.onerror=()=>rej(new Error("x"));
+          document.head.appendChild(sc);setTimeout(()=>rej(new Error("timeout")),25000);
+        });
+        if(window.heic2any)return;
+      }catch(e){}
+    }
+    throw new Error("HEIC 转换工具加载失败（需要联网下载一个小工具，换个网络再试）");
+  })();
+  heicLoading=p;p.catch(()=>{heicLoading=null;});
+  return p;
+}
+async function heicToPng(blob){
+  await loadHeicLib();
+  let out=await window.heic2any({blob,toType:"image/png"});
+  if(Array.isArray(out))out=out[0];
+  if(!out||!out.size)throw new Error("HEIC 转换失败");
+  return out;
+}
+async function fetchBlob(f){
+  const r=await fetch(API+encPath(f.path)+"?ref="+GH_BRANCH+"&r="+Date.now(),{headers:{"Authorization":"token "+getToken(),"Accept":"application/vnd.github.raw"},cache:"no-store"});
+  if(!r.ok)throw new Error("下载失败 "+r.status);
+  return r.blob();
+}
+async function probe(f){
+  if(AUD.includes(ext(f.name)))return {ok:true};
+  if(!f.size)return {ok:false,code:"empty",msg:"仓库里这个文件是空的（0 字节）"};
+  const url=siteUrl(f.path);
+  if(await imgTest(url+"?c="+Date.now()))return {ok:true};
+  let st=0;
+  try{const r=await fetch(url+"?c="+Date.now(),{method:"HEAD",cache:"no-store"});st=r.status;}catch(e){}
+  if(st===404)return {ok:false,code:"unpub",msg:"网站里还没有这张图（404）"};
+  if(st===0)return {ok:false,code:"net",msg:"网络不通，没检查成功"};
+  try{
+    const b=await fetchBlob(f);
+    const head=new Uint8Array(await b.slice(0,16).arrayBuffer());
+    return {ok:false,code:"bad",msg:"文件内容是 "+sniff(head)+" 格式，浏览器打不开"};
+  }catch(e){return {ok:false,code:"bad",msg:"文件打不开（"+e.message+"）"};}
+}
+let reportList=[];
+function checkAll(){checkList(items);}
+function checkSelected(){
+  const list=items.filter(f=>selected.has(f.path));
+  if(!list.length){toast("先点选要检查的图片");return;}
+  checkList(list);
+}
+async function checkList(list){
+  list=list.filter(f=>!AUD.includes(ext(f.name)));
+  if(!list.length){toast("没有可以检查的图片");return;}
+  if(!getToken()){toast("请先保存 Token");return;}
+  reportList=list;
+  const queue=list.slice();let done=0;
+  const worker=async()=>{
+    while(queue.length){
+      const f=queue.shift();
+      probeRes[f.path]=await probe(f);
+      done++;toast(`检查中 ${done}/${list.length}…`);
+    }
+  };
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  renderGrid();openReport();
+}
+function badItems(codes){return reportList.filter(f=>probeRes[f.path]&&!probeRes[f.path].ok&&codes.includes(probeRes[f.path].code));}
+function openReport(){
+  const vals=reportList.map(f=>probeRes[f.path]).filter(Boolean);
+  const bad=vals.filter(r=>!r.ok);
+  const cnt=c=>bad.filter(r=>r.code===c).length;
+  const unpub=cnt("unpub"),broken=cnt("empty")+cnt("bad"),net=cnt("net");
+  let h=`<h3>🩺 检查结果</h3><div class="tip" style="font-size:13px">共检查 ${vals.length} 张，正常 ${vals.length-bad.length} 张，有问题 ${bad.length} 张。有问题的图片下面已经标出原因。</div>`;
+  if(unpub)h+=`<div class="lab">🌐 网站里还没有（404）：${unpub} 张</div><div class="tip">这些图在仓库里有，但网站还没发布出来，也可能是旧的 404 缓存还没过期（最多约 10 分钟）。先点重新发布，等几分钟再重新检查。</div><div class="actrow"><button class="b-main" onclick="rebuildPages()">🔁 重新发布网站</button></div>`;
+  if(broken)h+=`<div class="lab">💔 文件本身有问题：${broken} 张</div><div class="tip">空文件，或者浏览器打不开的格式（比如 HEIC：手机相册能看，网页看不了）。「修复」会转成标准 PNG 重新上传，链接会变；修不好的可以「清理」删掉。</div><div class="actrow"><button class="b-main" onclick="repairBad()">🛠 尝试修复</button><button class="b-red" onclick="cleanBad()">🧹 清理</button></div>`;
+  if(net)h+=`<div class="lab">📶 网络不通：${net} 张</div><div class="tip">这几张没检查成功，换个网络或稍后重新检查。</div>`;
+  if(!bad.length)h+=`<div class="lab">🎉 全部正常</div>`;
+  h+=`<div class="actrow"><button class="b-gray" onclick="closeSheet();checkList(reportList)">🔍 重新检查</button><button class="b-gray" onclick="closeSheet()">关闭</button></div>`;
+  $("sheet").innerHTML=h;$("sheetMask").classList.add("show");
+}
+async function repairOne(f){
+  const blob=await fetchBlob(f);
+  if(!blob.size)throw new Error("空文件");
+  let src=blob;
+  if(sniff(new Uint8Array(await blob.slice(0,16).arrayBuffer()))==="HEIC")src=await heicToPng(blob);
+  let bmp;
+  try{bmp=await createImageBitmap(src);}
+  catch(e){
+    bmp=await new Promise((res,rej)=>{
+      const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error("浏览器也打不开"));
+      im.src=URL.createObjectURL(src);
+    });
+  }
+  const w0=bmp.width||bmp.naturalWidth,h0=bmp.height||bmp.naturalHeight;
+  const k=Math.min(1,2048/Math.max(w0,h0));
+  const cv=document.createElement("canvas");cv.width=Math.max(1,Math.round(w0*k));cv.height=Math.max(1,Math.round(h0*k));
+  cv.getContext("2d").drawImage(bmp,0,0,cv.width,cv.height);
+  const out=await new Promise(r=>cv.toBlob(r,"image/png"));
+  if(!out||!out.size)throw new Error("转换失败");
+  const b64=await toBase64(out);
+  const base=disp(f.name).replace(/\.[^.]+$/,"");
+  const newName=Date.now()+"_"+base+".png";
+  const dir=dirOfPath(f.path),np=(dir?dir+"/":"")+newName;
+  await gh("PUT",API+encPath(np),{message:"repair "+newName,content:b64,branch:GH_BRANCH});
+  if(names[f.path])names[np]=names[f.path];
+  await delFile(f.path,f.sha);
+  dropNames([f.path]);delete probeRes[f.path];
+}
+async function repairBad(){
+  const list=badItems(["empty","bad"]);
+  if(!list.length)return;
+  if(!confirm(`尝试修复 ${list.length} 张？\n会转成 PNG 重新上传，旧文件删除。\n⚠️ 链接会变（新文件名）。修不好的保持原样。`))return;
+  closeSheet();let ok=0,bad=0;
+  for(let i=0;i<list.length;i++){
+    toast(`修复中 ${i+1}/${list.length}…`);
+    try{await repairOne(list[i]);ok++;}catch(e){bad++;}
+  }
+  toast(`修复完成：成功 ${ok}，失败 ${bad}${bad?"（失败的可以点「检查图片」→「清理」）":""}`);
+  loadAll();
+}
+async function cleanBad(){
+  const list=badItems(["empty","bad"]);
+  if(!list.length)return;
+  if(!confirm(`确定删除这 ${list.length} 张有问题的图吗？不能恢复哦`))return;
+  closeSheet();
+  await delMany(list,"清理中");
+  list.forEach(f=>delete probeRes[f.path]);
+  loadAll();
+}
+
+/* ================= 重新加载图片 ================= */
+let thumbs=[];let arrows=[];const freshPaths=new Set();
+function loadImg(f,im,force){
+  const th=im.parentNode,fb=th.querySelector(".thfail");
+  fb.style.display="none";im.style.display="";
+  const srcs=[f.thumb,siteUrl(f.path)].filter(Boolean);
+  const bust=(force||freshPaths.has(f.path))?Date.now():0;
+  let i=0;
+  const give=()=>{im.style.display="none";fb.style.display="flex";};
+  const set=()=>{const u=srcs[i];im.src=u+(bust?(u.includes("?")?"&":"?")+"r="+bust:"");};
+  // 第3条通道：直接用 GitHub 接口下载（有时候前两条打不开，这条能通）
+  const viaApi=async()=>{
+    try{
+      const r=await fetch(API+encPath(f.path)+"?ref="+GH_BRANCH+"&r="+Date.now(),{headers:{"Authorization":"token "+getToken(),"Accept":"application/vnd.github.raw"},cache:"no-store"});
+      if(!r.ok)throw new Error("x");
+      const b=await r.blob();
+      im.onerror=give;im.src=URL.createObjectURL(b);
+    }catch(e){give();}
+  };
+  im.onerror=()=>{i++;if(i<srcs.length)set();else viaApi();};
+  set();
+}
+function refreshArrow(al){
+  const b=al.parentNode&&al.parentNode.querySelector(".chevbtn");if(!b)return;
+  const open=al.classList.contains("open");
+  al.classList.remove("open");
+  const over=al.scrollHeight>al.clientHeight+1;
+  if(open)al.classList.add("open");
+  b.style.display=(over||open)?"flex":"none";
+  b.classList.toggle("up",open);
+}
+/* ================= 标出未命名 ================= */
+let hlUnnamed=false;
+const HL_PRESETS=["#ffc247","#ff9a3c","#ff6b6b","#ff7aa8","#a67cff","#5aa9ff","#3fc7a5","#8bd24c"];
+function hex2rgb(h){h=h.replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");const n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function mixc(c,t,a){return c.map((v,i)=>Math.round(v*(1-a)+t[i]*a));}
+function rgbs(c){return "rgb("+c.join(",")+")";}
+function applyHlColor(hex,save){
+  const c=hex2rgb(hex),st=document.documentElement.style;
+  st.setProperty("--hl-border",hex);
+  st.setProperty("--hl-bg",rgbs(mixc(c,[255,255,255],.8)));
+  st.setProperty("--hl-thumb",rgbs(mixc(c,[255,255,255],.9)));
+  st.setProperty("--hl-text",rgbs(mixc(c,[0,0,0],.35)));
+  document.querySelectorAll("#hlSw .sw").forEach(b=>b.classList.toggle("on",b.dataset.c===hex));
+  $("hlPick").value=hex;
+  if(save)lsSet("gh_hl_color",hex);
+}
+(function initHl(){
+  const sw=$("hlSw");
+  HL_PRESETS.forEach(c=>{
+    const b=document.createElement("button");b.className="sw";b.dataset.c=c;b.style.background=c;
+    b.onclick=()=>applyHlColor(c,true);sw.appendChild(b);
+  });
+  $("hlPick").oninput=e=>applyHlColor(e.target.value,true);
+  applyHlColor(lsGet("gh_hl_color")||HL_PRESETS[0],false);
+})();
+function jumpUnnamed(){
+  const cards=[...document.querySelectorAll("#grid .file.unnamed")];
+  if(!cards.length){toast("没有未命名的了 🎉");return;}
+  const line=120;
+  const next=cards.find(c=>c.getBoundingClientRect().top>line+8)||cards[0];
+  window.scrollTo({top:window.scrollY+next.getBoundingClientRect().top-line,behavior:"smooth"});
+}
+function unnamedCount(){return items.filter(f=>!names[f.path]).length;}
+function updateHlBtn(){
+  const b=$("hlBtn");if(!b)return;
+  b.textContent=hlUnnamed?`🔎 取消标记（还有 ${unnamedCount()} 张未命名）`:"🔎 标出未命名";
+}
+function toggleHl(){
+  hlUnnamed=!hlUnnamed;
+  $("hlTools").classList.toggle("show",hlUnnamed);
+  document.querySelectorAll("#grid .file").forEach((c,i)=>{
+    c.classList.toggle("unnamed",hlUnnamed&&!!items[i]&&!names[items[i].path]);
+  });
+  updateHlBtn();
+  if(hlUnnamed){const n=unnamedCount();toast(n?`这个分类里有 ${n} 张还没命名（已高亮标出）`:"都命名好啦 🎉");}
+}
+function closePop(){const m=document.getElementById("popMask");if(m)m.remove();}
+function openMore(f,entry,al,btn){
+  closePop();
+  const mask=document.createElement("div");mask.id="popMask";
+  const pop=document.createElement("div");pop.className="pop";
+  const add=(label,fn)=>{
+    const b=document.createElement("button");b.textContent=label;
+    b.onclick=e=>{e.stopPropagation();closePop();fn();};pop.appendChild(b);
+  };
+  add("✏️ 改名字",()=>renameImg(f,al));
+  if(!entry.audio)add("✂️ 裁剪",()=>openCrop(f));
+  add("🔄 重新加载",()=>{reloadOne(entry);toast("重新加载中…");});
+  if(!entry.audio)add("🩺 检查",()=>checkList([f]));
+  mask.onclick=closePop;
+  mask.appendChild(pop);document.body.appendChild(mask);
+  // 右边对齐 ⋯ 按钮、向左展开；靠近屏幕底部时改成向上展开
+  const r=btn.getBoundingClientRect(),pw=pop.offsetWidth,ph=pop.offsetHeight;
+  let left=Math.max(8,Math.min(r.right-pw,window.innerWidth-pw-8));
+  let top=r.bottom+6;
+  if(top+ph>window.innerHeight-10)top=Math.max(8,r.top-ph-6);
+  pop.style.left=left+"px";pop.style.top=top+"px";
+  window.addEventListener("scroll",closePop,{once:true,passive:true});
+}
+/* ================= 裁剪 ================= */
+async function openCrop(f){
+  if(["svg","ico"].includes(ext(f.name))){toast("这种格式不能裁剪");return;}
+  toast("正在加载图片…");
+  let blob;
+  try{blob=await fetchBlob(f);}catch(e){toast("下载失败："+e.message);return;}
+  const url=URL.createObjectURL(blob),im=new Image();
+  try{await new Promise((res,rej)=>{im.onload=res;im.onerror=()=>rej(new Error("x"));im.src=url;});}
+  catch(e){URL.revokeObjectURL(url);toast("这张图浏览器打不开，先点「⋯ → 检查」修复一下");return;}
+  buildCropUI(f,im,url);
+}
+function buildCropUI(f,im,url){
+  const y0=window.scrollY;
+  const natW=im.naturalWidth,natH=im.naturalHeight;
+  const availW=Math.max(120,window.innerWidth-24-36),availH=Math.max(160,Math.min(window.innerHeight*0.5,520));
+  const k=Math.min(availW/natW,availH/natH);
+  const W=Math.max(40,Math.round(natW*k)),H=Math.max(40,Math.round(natH*k));
+  const sx=natW/W,sy=natH/H,MIN=28;
+  const isJpg=["jpg","jpeg"].includes(ext(f.name));
+  const RATIOS=[["自由",0],["1:1",1],["3:4",3/4],["4:3",4/3],["9:16",9/16],["16:9",16/9]];
+  const handles=["nw","n","ne","e","se","s","sw","w"].map(t=>`<div class="ch ${t}" data-t="${t}"></div>`).join("");
+  const m=document.createElement("div");m.id="cropMask";
+  m.innerHTML=`<h3>✂️ 裁剪这张图（${natW}×${natH}）</h3>
+  ${ext(f.name)==="gif"?'<div class="cnote">⚠️ 这是 gif，裁剪后会变成静态图</div>':""}
+  <div id="cropStage"><div id="cropWrap" style="width:${W}px;height:${H}px">
+    <div class="dim" id="dT"></div><div class="dim" id="dB"></div><div class="dim" id="dL"></div><div class="dim" id="dR"></div>
+    <div id="cropBox">${handles}</div></div></div>
+  <div id="cropInfo"></div>
+  <div class="rchips">${RATIOS.map(([l],i)=>`<button data-i="${i}">${l}</button>`).join("")}</div>
+  <div class="cact"><button class="b-main" id="cSave">✂️ 裁剪并替换原图</button><button class="b-gray" id="cCopy">另存为新图</button><button class="b-gray" id="cCancel">取消</button></div>
+  <div class="ctip">${f.name===f.name.replace(/\.[^.]+$/,"")+(isJpg?".jpg":".png")?"替换：直接覆盖原图，位置和链接都不变（网站缓存可能要几分钟才更新）。":"替换：新图放在原来的位置，原图会被删除；因为后缀会变成 "+(isJpg?".jpg":".png")+"，链接会变。"}<br>另存为新图：放在原图旁边，原图保留。</div>`;
+  document.body.appendChild(m);
+  const q=sel=>m.querySelector(sel);
+  const wrap=q("#cropWrap");wrap.insertBefore(im,wrap.firstChild);
+  const box=q("#cropBox"),dT=q("#dT"),dB=q("#dB"),dL=q("#dL"),dR=q("#dR"),info=q("#cropInfo");
+  let bx={x:0,y:0,w:W,h:H},ratio=0,drag=null,busy=false;
+  const clamp=(v,a,b)=>Math.min(Math.max(v,a),b);
+  const px=(el,l,t,w,h)=>{el.style.left=l+"px";el.style.top=t+"px";el.style.width=w+"px";el.style.height=h+"px";};
+  function upd(){
+    px(box,bx.x,bx.y,bx.w,bx.h);
+    px(dT,0,0,W,bx.y);px(dB,0,bx.y+bx.h,W,H-bx.y-bx.h);
+    px(dL,0,bx.y,bx.x,bx.h);px(dR,bx.x+bx.w,bx.y,W-bx.x-bx.w,bx.h);
+    info.textContent="裁剪后："+Math.round(bx.w*sx)+" × "+Math.round(bx.h*sy)+" 像素";
+  }
+  function applyRatio(t,l,tp,r,bt){
+    const ax=t.includes("w")?r:l,ay=t.includes("n")?bt:tp;
+    let w=Math.max(r-l,MIN),h=w/ratio;
+    const maxW=t.includes("w")?ax:W-ax,maxH=t.includes("n")?ay:H-ay;
+    if(w>maxW){w=maxW;h=w/ratio;}
+    if(h>maxH){h=maxH;w=h*ratio;}
+    return {x:t.includes("w")?ax-w:ax,y:t.includes("n")?ay-h:ay,w,h};
+  }
+  function calc(t,b,dx,dy){
+    if(t==="move")return {x:clamp(b.x+dx,0,W-b.w),y:clamp(b.y+dy,0,H-b.h),w:b.w,h:b.h};
+    let l=b.x,tp=b.y,r=b.x+b.w,bt=b.y+b.h;
+    if(t.includes("w"))l=clamp(b.x+dx,0,r-MIN);
+    if(t.includes("e"))r=clamp(b.x+b.w+dx,l+MIN,W);
+    if(t.includes("n"))tp=clamp(b.y+dy,0,bt-MIN);
+    if(t.includes("s"))bt=clamp(b.y+b.h+dy,tp+MIN,H);
+    if(ratio&&t.length===2)return applyRatio(t,l,tp,r,bt);
+    return {x:l,y:tp,w:r-l,h:bt-tp};
+  }
+  function mv(e){if(!drag)return;bx=calc(drag.t,drag.b,e.clientX-drag.x,e.clientY-drag.y);upd();}
+  function up(){drag=null;window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);window.removeEventListener("pointercancel",up);}
+  box.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    const t=(e.target.dataset&&e.target.dataset.t)||"move";
+    drag={t,x:e.clientX,y:e.clientY,b:{...bx}};
+    window.addEventListener("pointermove",mv);window.addEventListener("pointerup",up);window.addEventListener("pointercancel",up);
+  });
+  function setRatio(i){
+    ratio=RATIOS[i][1];
+    m.classList.toggle("locked",!!ratio);
+    m.querySelectorAll(".rchips button").forEach((b,n)=>b.classList.toggle("on",n===i));
+    if(ratio){
+      let w=W,h=W/ratio;if(h>H){h=H;w=H*ratio;}
+      bx={x:(W-w)/2,y:(H-h)/2,w,h};
+    }
+    upd();
+  }
+  m.querySelectorAll(".rchips button").forEach((b,n)=>b.onclick=()=>setRatio(n));
+  function closeCrop(){
+    up();m.remove();URL.revokeObjectURL(url);
+    setTimeout(()=>window.scrollTo(0,y0),0);
+  }
+  async function save(replace){
+    if(busy)return;busy=true;m.classList.add("busy");
+    try{
+      const cx=Math.round(bx.x*sx),cy=Math.round(bx.y*sy);
+      const cw=Math.max(1,Math.min(natW-cx,Math.round(bx.w*sx))),ch=Math.max(1,Math.min(natH-cy,Math.round(bx.h*sy)));
+      const cv=document.createElement("canvas");cv.width=cw;cv.height=ch;
+      const ctx=cv.getContext("2d");
+      if(isJpg){ctx.fillStyle="#fff";ctx.fillRect(0,0,cw,ch);}
+      ctx.drawImage(im,cx,cy,cw,ch,0,0,cw,ch);
+      const out=await new Promise(r=>cv.toBlob(r,isJpg?"image/jpeg":"image/png",0.92));
+      if(!out)throw new Error("裁剪失败");
+      toast("上传中…");
+      const b64=await toBase64(out);
+      // 沿用原来的文件名（时间戳前缀不变），图片就还在原来的位置
+      const stem=f.name.replace(/\.[^.]+$/,""),newExt=isJpg?".jpg":".png";
+      const dir=dirOfPath(f.path),pre=dir?dir+"/":"";
+      let newName,overwrite=false;
+      if(replace){newName=stem+newExt;overwrite=(pre+newName===f.path);}
+      else{
+        let n=stem+"_cut"+newExt,i=2;
+        while(items.some(x=>x.name===n)){n=stem+"_cut"+i+newExt;i++;}
+        newName=n;
+      }
+      const np=pre+newName;
+      const body={message:"crop "+newName,content:b64,branch:GH_BRANCH};
+      if(overwrite)body.sha=f.sha;   // 同名覆盖：位置和链接都不变
+      await gh("PUT",API+encPath(np),body);
+      freshPaths.add(np);
+      if(np!==f.path&&names[f.path]){names[np]=names[f.path];saveNamesLocal();}
+      let msg;
+      if(!replace)msg="已另存为新图，就在原图旁边 ✅";
+      else if(overwrite)msg="裁剪完成 ✅ 位置和链接都没变（网站缓存可能要几分钟才显示新图）";
+      else{
+        msg="裁剪完成 ✅ 位置不变，但后缀变了，链接会变";
+        try{await delFile(f.path,f.sha);dropNames([f.path]);}
+        catch(e){msg="新图已上传，但原图没删掉，可以手动删除";}
+      }
+      closeCrop();toast(msg);loadAll();
+    }catch(e){busy=false;m.classList.remove("busy");toast("裁剪失败："+e.message);}
+  }
+  q("#cSave").onclick=()=>save(true);
+  q("#cCopy").onclick=()=>save(false);
+  q("#cCancel").onclick=closeCrop;
+  setRatio(0);
+}
+function reloadOne(e){
+  if(e.audio){e.el.src=siteUrl(e.f.path)+"?r="+Date.now();}
+  else loadImg(e.f,e.el,true);
+}
+function reloadAll(){
+  if(!thumbs.length){toast("这里没有图片可以加载");return;}
+  thumbs.forEach(reloadOne);
+  toast(`正在重新加载 ${thumbs.length} 个…`);
+}
+
+/* ================= 删除 ================= */
+async function delFile(path,sha){
+  const go=()=>fetch(API+encPath(path),{method:"DELETE",headers:headers(),body:JSON.stringify({message:"delete "+path,sha:sha,branch:GH_BRANCH})});
+  let r=await go();
+  if(!r.ok){await sleep(1000);r=await go();}
+  if(!r.ok)throw new Error("错误码 "+r.status);
+}
+async function delOne(f){
+  if(!confirm("确定删除 "+disp(f.name)+" 吗？不能恢复哦"))return;
+  try{await delFile(f.path,f.sha);dropNames([f.path]);toast("已删除");loadAll();}
+  catch(e){toast("删除失败："+e.message);}
+}
+async function delMany(list,label){
+  let ok=0,bad=0;
+  for(let i=0;i<list.length;i++){
+    toast(`${label} ${i+1}/${list.length}…`);
+    try{await delFile(list[i].path,list[i].sha);dropNames([list[i].path]);ok++;}catch(e){bad++;}
+  }
+  toast(bad?`删除完成：成功 ${ok}，失败 ${bad}`:`已删除 ${ok} 个 ✅`);
+}
+async function delSelected(){
+  const list=items.filter(f=>selected.has(f.path));
+  if(!list.length){toast("还没有选中任何文件");return;}
+  if(!confirm(`确定删除选中的 ${list.length} 个文件吗？不能恢复哦`))return;
+  await delMany(list,"删除中");
+  managing=false;loadAll();
+}
+async function delCat(){
+  if(curDir===""||curDir===BASE)return;
+  const name=curDir;
+  if(!confirm(`确定删除分类「${inBase(name)?catName(name):name}」以及里面的 ${items.length} 个文件吗？不能恢复哦！`))return;
+  if(items.length)await delMany(items,"删除分类中");
+  if(inBase(name))saveLocalCats(localCats().filter(c=>c!==catName(name)));
+  curDir=BASE;managing=false;loadAll();
+}
+
+/* ================= 移动 ================= */
+async function moveFiles(list,destDir){
+  const mv=list.filter(f=>dirOfPath(f.path)!==destDir);
+  for(let i=0;i<mv.length;i+=100){
+    const chunk=mv.slice(i,i+100);
+    toast(`移动中 ${Math.min(i+100,mv.length)}/${mv.length}…`);
+    const ref=await gh("GET",GIT+"ref/heads/"+GH_BRANCH+"?t="+Date.now());
+    const head=ref.object.sha;
+    const commit=await gh("GET",GIT+"commits/"+head);
+    const tree=[];
+    chunk.forEach(f=>{
+      tree.push({path:destDir+"/"+f.name,mode:"100644",type:"blob",sha:f.sha});
+      tree.push({path:f.path,mode:"100644",type:"blob",sha:null});
+    });
+    const nt=await gh("POST",GIT+"trees",{base_tree:commit.tree.sha,tree});
+    const nc=await gh("POST",GIT+"commits",{message:"move files",tree:nt.sha,parents:[head]});
+    await gh("PATCH",GIT+"refs/heads/"+GH_BRANCH,{sha:nc.sha});
+    remapNames(chunk.map(f=>[f.path,destDir+"/"+f.name]));
+  }
+  return mv.length;
+}
+function closeSheet(){$("sheetMask").classList.remove("show");}
+function openMove(){
+  if(!items.some(f=>selected.has(f.path))){toast("先点选要移动的图片");return;}
+  if(running){toast("还在上传中，等传完再移动");return;}
+  const sh=$("sheet");sh.innerHTML="";
+  const h=document.createElement("h3");h.textContent=`📦 把选中的 ${selected.size} 张移动到…`;sh.appendChild(h);
+  tabs.filter(t=>inBase(t.dir)&&t.dir!==curDir).forEach(t=>{
+    const b=document.createElement("button");b.className="b-gray";b.textContent=t.label;
+    b.onclick=()=>doMove(t.dir);sh.appendChild(b);
+  });
+  const nb=document.createElement("button");nb.className="b-main";nb.textContent="＋ 新建分类并移动";
+  nb.onclick=async()=>{
+    const n=await askCatName();if(!n)return;
+    const l=localCats();if(!l.includes(n)){l.push(n);saveLocalCats(l);}
+    doMove(BASE+"/"+n);
+  };
+  sh.appendChild(nb);
+  const cb=document.createElement("button");cb.className="b-gray";cb.style.textAlign="center";cb.textContent="取消";cb.onclick=closeSheet;sh.appendChild(cb);
+  $("sheetMask").classList.add("show");
+}
+async function doMove(destDir){
+  const list=items.filter(f=>selected.has(f.path));
+  const fromRoot=list.some(f=>!inBase(dirOfPath(f.path)));
+  if(fromRoot&&!confirm("移动旧文件后，它们的图片链接会变（路径里会多出 images/ 和分类名）。\n如果旧链接已经贴到别的地方，那些地方会失效。\n\n确定移动吗？"))return;
+  closeSheet();
+  try{
+    const n=await moveFiles(list,destDir);
+    toast(`已移动 ${n} 张 ✅ 新链接约 1～2 分钟后生效`);
+    curDir=destDir;managing=false;loadAll();
+  }catch(e){toast("移动失败："+e.message);}
+}
+
+/* ================= 批量管理 ================= */
+function toggleManage(){managing=!managing;selected=new Set();document.querySelectorAll(".file").forEach(c=>c.classList.remove("sel"));applyManage();}
+function applyManage(){
+  $("grid").classList.toggle("managing",managing);
+  document.body.classList.toggle("managing-on",managing);
+  $("manageBtn").textContent=managing?"退出批量":"☑️ 批量管理";
+  updateM();
+}
+function updateM(){$("mcount").textContent=`已选 ${selected.size}`;}
+function selAll(){
+  if(selected.size===items.length)selected=new Set();else selected=new Set(items.map(f=>f.path));
+  document.querySelectorAll(".file").forEach((c,i)=>c.classList.toggle("sel",!!items[i]&&selected.has(items[i].path)));
+  updateM();
+}
+
+$("token").value=getToken();
+loadAll();
+</script>
+</body>
+</html>
